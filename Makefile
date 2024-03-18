@@ -1,6 +1,6 @@
 build:
-	@go build -o bin/docrilla
+	@go build -o bin/docrilla cmd/main/main.go
 run:
-	@air --build.cmd "go build -o bin/docrilla cmd/main/main.go" --build.bin "./bin/docrilla"
+	@air --build.cmd "make build" --build.bin "./bin/docrilla"
 test:
 	@go test -v ./...
