@@ -3,13 +3,20 @@ package server
 import "net/http"
 
 type App struct {
-	httpServer *http.Server
+	mux *http.ServeMux
 }
 
 func NewApp() *App {
-	return &App{}
+	return &App{
+		mux: routeInitializer(),
+	}
 }
 
 func (a *App) Run(port string) error {
 	return nil
+}
+
+func routeInitializer() *http.ServeMux {
+	mux := http.NewServeMux()
+	return mux
 }
