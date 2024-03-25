@@ -1,7 +1,10 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+)
 
 func main() {
-	fmt.Println("Init push")
+	fmt.Println("Init push", os.Getenv("TEST_ENV"))
 }
