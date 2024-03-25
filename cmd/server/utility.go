@@ -1,4 +1,4 @@
-package server
+package main
 
 func httpLink(addr string, secure bool) string {
 	if addr[0] == ':' {

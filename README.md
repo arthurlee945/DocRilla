@@ -3,7 +3,7 @@
     <h1>Doc-rilla</h1>
   </p>
   <p>
-    PDF documantion generator middleware
+    PDF documentation generator middleware
   </p>
   <p>
     <em>Leave a Like! or check out my portfolio <a href="https://arthurlee.bio">arthurlee.bio</a></em>
