@@ -1,6 +1,6 @@
 <div align="center">
   <p>
-    <h1>Doc-rilla</h1>
+    <h1>DocRilla</h1>
   </p>
   <p>
     PDF documentation generator middleware

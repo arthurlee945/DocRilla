@@ -2,9 +2,19 @@ package main
 
 import (
 	"fmt"
-	"os"
+	"log"
+
+	"github.com/arthurlee945/doc-rilla/config"
+	"github.com/joho/godotenv"
 )
 
+func init() {
+	if err := godotenv.Load(); err != nil {
+		log.Println("No .env file found")
+	}
+}
+
 func main() {
-	fmt.Println("Init push", os.Getenv("TEST_ENV"))
+	config := config.New()
+	fmt.Println("Init push", config.DatabaseUrl)
 }
