@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/arthurlee945/doc-rilla/config"
+	"github.com/arthurlee945/Docrilla/config"
 	"github.com/joho/godotenv"
 )
 

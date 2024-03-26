@@ -3,7 +3,7 @@ package db
 import (
 	"database/sql"
 
-	"github.com/arthurlee945/doc-rilla/config"
+	"github.com/arthurlee945/Docrilla/config"
 	_ "github.com/lib/pq"
 )
 

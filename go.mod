@@ -1,4 +1,4 @@
-module github.com/arthurlee945/doc-rilla
+module github.com/arthurlee945/Docrilla
 
 go 1.22.0
 
