@@ -2,10 +2,16 @@ package config
 
 import (
 	"os"
+
+	"github.com/joho/godotenv"
 )
 
 type Config struct {
 	DatabaseUrl string
+}
+
+func Initialize(filename string) error {
+	return godotenv.Load(filename)
 }
 
 func New() *Config {

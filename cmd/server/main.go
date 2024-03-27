@@ -5,11 +5,10 @@ import (
 	"log"
 
 	"github.com/arthurlee945/Docrilla/config"
-	"github.com/joho/godotenv"
 )
 
 func init() {
-	if err := godotenv.Load(); err != nil {
+	if err := config.Initialize(".env"); err != nil {
 		log.Println("No .env file found")
 	}
 }
