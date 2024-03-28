@@ -2,8 +2,10 @@ package repo
 
 import (
 	"database/sql"
+	"fmt"
 
 	"github.com/arthurlee945/Docrilla/model"
+	"github.com/arthurlee945/Docrilla/model/user"
 )
 
 type UserRepository struct {
@@ -17,14 +19,30 @@ func NewUserRepository(db *sql.DB) *UserRepository {
 }
 
 func (ur *UserRepository) InitializeTable() error {
-	query := `
-	CREATE TABLE IF NOT EXISTS user (
+	enumQuery := fmt.Sprintf("CREATE TYPE IF NOT EXITS UserRole AS ENUM ('%v', '%v')", user.ADMIN, user.USER)
+	if _, err := ur.db.Exec(enumQuery); err != nil {
+		return err
+	}
+
+	query := fmt.Sprintf(`
+	CREATE TABLE IF NOT EXISTS User (
 		id SERIAL PRIMARY KEY,
-		uuid BINARY(16) NOT NULL UNIQUE,
+		uuid UUID DEFAULT gen_random_uuid(),
 		name VARCHAR(100) NOT NULL,
-		created_at TIMESTAMP DEFAULT NOW()
-		updated_at DATETIME DEFAULT NOW() ON UPDATE NOW()
-	)`
+		email NVARCHAR(320) NOT NULL,
+		email_verified BOOLEAN DEFAULT FALSE,
+		email_verification_token VARCHAR(62),
+		password VARCHAR(62) NOT NULL,
+		password_changed_at TIMESTAMP,
+		reset_password_token VARCHAR(62),
+		reset_password_expires TIMESTAMP,
+		access_token VARCHAR(62),
+		token_expires_at TIMESTAMP,
+		role  UserRole DEFAULT %v,
+		active BOOLEAN DEFAULT TRUE,
+		created_at TIMESTAMP DEFAULT NOW(),
+		updated_at TIMESTAMP DEFAULT NOW() ON UPDATE NOW()
+	)`, user.USER)
 
 	if _, err := ur.db.Exec(query); err != nil {
 		return err
@@ -34,7 +52,7 @@ func (ur *UserRepository) InitializeTable() error {
 
 func (ur *UserRepository) Get(userId string) (*model.User, error) {
 	query := `
-	SELECT uuid, name
+	SELECT uuid, name 
 	FROM users
 	WHERE id = $1
 	`
