@@ -18,7 +18,7 @@ func (pr *ProjectRepository) InitializeTable() error {
 	query := `
 	CREATE TABLE IF NOT EXISTS Project (
 		id SERIAL PRIMARY KEY,
-		uuid UUID DEFAULT gen_random_uuid(),
+		endpoint UUID DEFAULT gen_random_uuid(),
 		user_id INT NOT NULL,
 		title VARCHAR(128) NOT NULL,
 		description NVARCHAR(512),
@@ -26,7 +26,7 @@ func (pr *ProjectRepository) InitializeTable() error {
 		archived BOOLEAN DEFAULT FALSE,
 		created_at TIMESTAMP DEFAULT NOW(),
 		updated_at TIMESTAMP DEFAULT NOW() ON UPDATE NOW()
-		CONTRAINT fk_User FOREIGN KEY(user_id) REFERENCES User(id)
+		CONSTRAINT fk_User FOREIGN KEY(user_id) REFERENCES User(id) ON DELETE CASCADE
 	)`
 
 	if _, err := pr.db.Exec(query); err != nil {

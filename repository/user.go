@@ -65,5 +65,5 @@ func (ur *UserRepository) Get(userId string) (*model.User, error) {
 		return nil, err
 	}
 
-	return &model.User{ID: uuid, Name: name}, nil
+	return &model.User{UserID: 0, Name: name}, nil
 }
