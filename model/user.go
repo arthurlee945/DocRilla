@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/arthurlee945/Docrilla/model/user"
+	"github.com/arthurlee945/Docrilla/model/enum/user"
 )
 
 var UserSchema = fmt.Sprintf(`
@@ -45,5 +45,5 @@ type User struct {
 	Active                 bool
 	CreatedAt              time.Time `db:"created_at"`
 	UpdatedAt              time.Time `db:"updated_at"`
-	Projects               []Project `db:"projects"`
+	Projects               []Project
 }

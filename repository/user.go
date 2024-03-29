@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/arthurlee945/Docrilla/model"
-	"github.com/arthurlee945/Docrilla/model/user"
+	"github.com/arthurlee945/Docrilla/model/enum/user"
 )
 
 type UserRepository struct {

@@ -5,8 +5,8 @@ import "time"
 var ProjectSchema = `
 	CREATE TABLE IF NOT EXISTS Project (
 		id SERIAL PRIMARY KEY,
-		endpoint UUID DEFAULT gen_random_uuid() UNIQUE,
 		user_id INT NOT NULL,
+		endpoint UUID DEFAULT gen_random_uuid() UNIQUE,
 		title VARCHAR(128) NOT NULL,
 		description NVARCHAR(512),
 		document_url varchar(256) NOT NULL,
@@ -18,7 +18,7 @@ var ProjectSchema = `
 `
 
 type Project struct {
-	ProjectID   string
+	ProjectID   uint64
 	Endpoint    string
 	UserID      int `db:"user_id"`
 	Title       string
