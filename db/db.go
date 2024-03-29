@@ -2,6 +2,7 @@ package db
 
 import (
 	"github.com/arthurlee945/Docrilla/config"
+	"github.com/arthurlee945/Docrilla/model"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 )
@@ -20,4 +21,11 @@ func NewConnection() (*sqlx.DB, error) {
 	}
 
 	return db, nil
+}
+
+func InitializeTable(db *sqlx.DB) error {
+	if _, err := db.Exec(model.GetTablesSchema()); err != nil {
+		return err
+	}
+	return nil
 }
