@@ -1,0 +1,14 @@
+{
+  "name": "helper",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "gen": "prisma migrate dev --create-only"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "prisma": "^5.11.0"
+  }
+}

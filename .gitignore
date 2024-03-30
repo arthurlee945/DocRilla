@@ -1,3 +1,6 @@
 bin
 tmp
 .env
+node_modules
+pnpm-lock.yaml
+migrations
