@@ -6,22 +6,21 @@ import (
 	"github.com/arthurlee945/Docrilla/model/enum/field"
 )
 
-var FieldSchema = fmt.Sprintf(`
-	CREATE TYPE IF NOT EXITS FieldType AS ENUM ('%v', '%v', '%v')
-
-	CREATE TABLE IF NOT EXISTS Field (
-		id SERIAL PRIMARY KEY,
-		project_id INT NOT NULL,
-		x1 NUMERIC NOT NULL,
-		y1 NUMERIC NOT NULL,
-		x2 NUMERIC NOT NULL,
-		y2 NUMERIC NOT NULL,
-		page INT NOT NULL,
-		type FieldType NOT NULL,
-		field_id TEXT NOT NULL,
-		value TEXT NOT NULL,
-		CONTRAINT fk_Project FOREIGN KEY(project_id) REFERENCES Project(id) ON DELETE CASCADE
-	)
+var fieldSchema = fmt.Sprintf(`
+CREATE TABLE IF NOT EXISTS field (
+	id SERIAL PRIMARY KEY,
+	x1 NUMERIC NOT NULL,
+	y1 NUMERIC NOT NULL,
+	x2 NUMERIC NOT NULL,
+	y2 NUMERIC NOT NULL,
+	page INT NOT NULL,
+	type TEXT NOT NULL,
+	field_id TEXT NOT NULL,
+	value TEXT NOT NULL,
+	project_id INT,
+	CONSTRAINT fk_project FOREIGN KEY(project_id) REFERENCES project(id),
+	CONSTRAINT check_type check (type in ('%v', '%v', '%v'));
+);
 `, field.TEXT, field.NUMBER, field.IMAGE)
 
 type Field struct {

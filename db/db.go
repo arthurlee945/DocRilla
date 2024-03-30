@@ -1,16 +1,13 @@
 package db
 
 import (
-	"github.com/arthurlee945/Docrilla/config"
 	"github.com/arthurlee945/Docrilla/model"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 )
 
-var cfg = config.New()
-
-func NewConnection() (*sqlx.DB, error) {
-	db, err := sqlx.Open("postgres", cfg.DatabaseUrl)
+func Connect(connStr string) (*sqlx.DB, error) {
+	db, err := sqlx.Open("postgres", connStr)
 
 	if err != nil {
 		return nil, err

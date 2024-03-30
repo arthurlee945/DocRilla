@@ -25,8 +25,8 @@ func (pr *ProjectRepository) InitializeTable() error {
 		document_url varchar(256) NOT NULL,
 		archived BOOLEAN DEFAULT FALSE,
 		created_at TIMESTAMP DEFAULT NOW(),
-		updated_at TIMESTAMP DEFAULT NOW() ON UPDATE NOW()
-		CONSTRAINT fk_User FOREIGN KEY(user_id) REFERENCES User(id) ON DELETE CASCADE
+		updated_at TIMESTAMP DEFAULT NOW(),
+		CONSTRAINT fk_User FOREIGN KEY(user_id) REFERENCES user_account(id) ON DELETE CASCADE
 	)`
 
 	if _, err := pr.db.Exec(query); err != nil {

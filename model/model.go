@@ -4,10 +4,9 @@ import "fmt"
 
 func GetTablesSchema() string {
 	return fmt.Sprintf(`
-	%v
-
-	%v
-
-	%v
-	`, ProjectSchema, FieldSchema, UserSchema)
+%v
+%v
+%v
+%v
+	`, updateTimestampFunc, userSchema, projectSchema, fieldSchema)
 }

@@ -1,21 +1,26 @@
 package model
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
-var ProjectSchema = `
-	CREATE TABLE IF NOT EXISTS Project (
-		id SERIAL PRIMARY KEY,
-		user_id INT NOT NULL,
-		endpoint UUID DEFAULT gen_random_uuid() UNIQUE,
-		title VARCHAR(128) NOT NULL,
-		description NVARCHAR(512),
-		document_url varchar(256) NOT NULL,
-		archived BOOLEAN DEFAULT FALSE,
-		created_at TIMESTAMP DEFAULT NOW(),
-		updated_at TIMESTAMP DEFAULT NOW() ON UPDATE NOW(),
-		CONTRAINT fk_User FOREIGN KEY(user_id) REFERENCES User(id) ON DELETE CASCADE
-	)
-`
+var projectSchema = fmt.Sprintf(`
+CREATE TABLE IF NOT EXISTS project (
+	id SERIAL PRIMARY KEY,
+	endpoint UUID DEFAULT gen_random_uuid() UNIQUE,
+	title VARCHAR(128) NOT NULL,
+	description TEXT,
+	document_url TEXT NOT NULL,
+	archived BOOLEAN DEFAULT FALSE,
+	created_at TIMESTAMP DEFAULT NOW(),
+	updated_at TIMESTAMP DEFAULT NOW(),
+	user_id INT,
+	CONSTRAINT fk_account FOREIGN KEY(user_id) REFERENCES user_account(id)
+);
+
+%v
+`, addAutoUpdatedAtTrigger("project"))
 
 type Project struct {
 	ProjectID   uint64
