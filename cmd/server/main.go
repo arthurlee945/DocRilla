@@ -22,5 +22,6 @@ func main() {
 		log.Fatalln(err)
 	}
 	defer dbConn.Close()
-	db.InitializeTable(dbConn)
+	// db.InitializeTable(dbConn)
+	// dbConn.Exec("DROP Table IF EXITS account, field, project, session, usr, verification_token")
 }

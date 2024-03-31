@@ -3,7 +3,7 @@ package model
 import "github.com/arthurlee945/Docrilla/model/enum/field"
 
 type Field struct {
-	FieldId string `db:"id"`
+	ID      string
 	X1      float64
 	Y1      float64
 	X2      float64

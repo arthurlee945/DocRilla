@@ -31,5 +31,5 @@ func (ur *UserRepository) Get(userId string) (*model.User, error) {
 		return nil, err
 	}
 
-	return &model.User{UserID: 0, Name: name}, nil
+	return &model.User{ID: 0, Name: name}, nil
 }

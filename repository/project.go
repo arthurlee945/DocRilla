@@ -1,36 +1,47 @@
 package repo
 
 import (
-	"database/sql"
+	"github.com/arthurlee945/Docrilla/model"
+	"github.com/jmoiron/sqlx"
 )
 
 type ProjectRepository struct {
-	db *sql.DB
+	db *sqlx.DB
 }
 
-func NewProjectRepository(db *sql.DB) *ProjectRepository {
+func NewProjectRepository(db *sqlx.DB) *ProjectRepository {
 	return &ProjectRepository{
 		db,
 	}
 }
 
-func (pr *ProjectRepository) InitializeTable() error {
+func (pr *ProjectRepository) GetOverview(id string) (*model.Project, error) {
 	query := `
-	CREATE TABLE IF NOT EXISTS Project (
-		id SERIAL PRIMARY KEY,
-		endpoint UUID DEFAULT gen_random_uuid(),
-		user_id INT NOT NULL,
-		title VARCHAR(128) NOT NULL,
-		description NVARCHAR(512),
-		document_url varchar(256) NOT NULL,
-		archived BOOLEAN DEFAULT FALSE,
-		created_at TIMESTAMP DEFAULT NOW(),
-		updated_at TIMESTAMP DEFAULT NOW(),
-		CONSTRAINT fk_User FOREIGN KEY(user_id) REFERENCES user_account(id) ON DELETE CASCADE
-	)`
-
-	if _, err := pr.db.Exec(query); err != nil {
-		return err
+	SELECT endpoint, title, description, archived, created_at, visited_at 
+	FROM project where id = ?
+	`
+	var project *model.Project
+	err := pr.db.Get(project, query, id)
+	if err != nil {
+		return nil, err
 	}
+	return project, nil
+}
+
+func (pr *ProjectRepository) GetDetail(id string) (*model.Project, error) {
+	var project *model.Project
+	var fields []model.Field
+	projErr := pr.db.Get(project, `SELECT * FROM project WHERE id = ?`, id)
+	if projErr != nil {
+		return nil, projErr
+	}
+	fieldErr := pr.db.Select(&fields, `SELECT * FROM field WHERE project_id = ?`, id)
+	if fieldErr != nil {
+		return nil, fieldErr
+	}
+	return project, nil
+}
+
+func (pr *ProjectRepository) Create() error {
 	return nil
 }

@@ -76,7 +76,7 @@ enum Type {
 model project {
   id           Int       @id @default(autoincrement())
   user_id      Int
-  endpoint     String
+  endpoint     String    @default(cuid())
   title        String
   description  String?
   document_url String
