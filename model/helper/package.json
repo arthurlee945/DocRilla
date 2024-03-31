@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "gen": "rm -rf migrations && prisma migrate dev --skip-generate --name helper-file --create-only"
+    "gen": "rm -rf migrations migration.sql && prisma migrate dev --skip-generate --name helper-file --create-only"
   },
   "author": "",
   "license": "ISC",
