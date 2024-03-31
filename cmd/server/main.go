@@ -14,7 +14,6 @@ func init() {
 		log.Println("No .env file found")
 	}
 	cfg = config.New()
-
 }
 
 func main() {

@@ -4,11 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "gen": "prisma migrate dev --create-only"
+    "gen": "rm -rf migrations && prisma migrate dev --skip-generate --name helper-file --create-only"
   },
   "author": "",
   "license": "ISC",
-  "dependencies": {
+  "devDependencies": {
     "prisma": "^5.11.0"
   }
 }

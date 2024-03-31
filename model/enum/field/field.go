@@ -1,11 +1,11 @@
 package field
 
-type FieldType string
+type Type string
 
 const (
-	TEXT   FieldType = "TEXT"
-	IMAGE  FieldType = "IMAGE"
-	NUMBER FieldType = "NUMBER"
+	TEXT   Type = "TEXT"
+	IMAGE  Type = "IMAGE"
+	NUMBER Type = "NUMBER"
 )
 
-var FieldTypes = [3]FieldType{TEXT, IMAGE, NUMBER}
+var FieldTypes = [3]Type{TEXT, IMAGE, NUMBER}

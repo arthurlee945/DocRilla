@@ -21,7 +21,11 @@ func Connect(connStr string) (*sqlx.DB, error) {
 }
 
 func InitializeTable(db *sqlx.DB) error {
-	if _, err := db.Exec(model.GetTablesSchema()); err != nil {
+	qs, err := model.GetQueryString()
+	if err != nil {
+		return err
+	}
+	if _, err := db.Exec(qs); err != nil {
 		return err
 	}
 	return nil

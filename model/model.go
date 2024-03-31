@@ -1,12 +1,15 @@
 package model
 
-import "fmt"
+import "os"
 
-func GetTablesSchema() string {
-	return fmt.Sprintf(`
-%v
-%v
-%v
-%v
-	`, updateTimestampFunc, userSchema, projectSchema, fieldSchema)
+func GetQueryString() (string, error) {
+	wd, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+	dat, err := os.ReadFile(wd + "/model/helper/migration.sql")
+	if err != nil {
+		return "", err
+	}
+	return string(dat), nil
 }
