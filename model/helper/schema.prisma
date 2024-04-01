@@ -7,7 +7,7 @@ datasource db {
   url      = "postgresql://public_user:Qwer1234@localhost:5432/postgres"
 }
 
-enum role {
+enum user_role {
   ADMIN
   MODERATOR
   USER
@@ -39,12 +39,12 @@ model usr {
   email_verified           Boolean?  @default(false)
   email_verification_token String?
   password                 String?
-  role                     role      @default(USER)
+  role                     user_role      @default(USER)
   password_changed_at      DateTime?
   reset_password_token     String?
   reset_password_expires   DateTime?
   created_at               DateTime  @default(now())
-  updated_at               DateTime  @updatedAt
+  updated_at               DateTime  @updatedAt @default(now())
   active                   Boolean   @default(true)
   accounts                 account[]
   sessions                 session[]
@@ -67,7 +67,7 @@ model verification_token {
   @@unique([identifier, token])
 }
 
-enum Type {
+enum project_type {
   TEXT
   IMAGE
   NUMBER
@@ -83,7 +83,7 @@ model project {
   archived     Boolean   @default(false)
   visited_at   DateTime?
   created_at   DateTime  @default(now())
-  updated_at   DateTime  @updatedAt
+  updated_at   DateTime  @updatedAt @default(now())
   fields       field[]
   user         usr       @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
@@ -98,7 +98,7 @@ model field {
   x2         Float
   y2         Float
   page       Int
-  type       Type
+  type       project_type
   value      Bytes
   project    project @relation(fields: [project_id], references: [id], onDelete: Cascade)
 }
