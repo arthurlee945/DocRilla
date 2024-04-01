@@ -23,5 +23,8 @@ func main() {
 	}
 	defer dbConn.Close()
 	// db.InitializeTable(dbConn)
-	// dbConn.Exec("DROP Table IF EXITS account, field, project, session, usr, verification_token")
+	// dbConn.Exec(`
+	// DROP Table IF EXISTS account, field, project, session, usr, verification_token;
+	// DROP Type IF EXISTS user_role, role, project_type, type;
+	// `)
 }

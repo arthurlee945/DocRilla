@@ -7,7 +7,7 @@ func GetQueryString() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	dat, err := os.ReadFile(wd + "/model/helper/migration/migration.sql")
+	dat, err := os.ReadFile(wd + "/model/helper/migration.sql")
 	if err != nil {
 		return "", err
 	}

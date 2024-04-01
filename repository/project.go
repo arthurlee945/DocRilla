@@ -15,31 +15,32 @@ func NewProjectRepository(db *sqlx.DB) *ProjectRepository {
 	}
 }
 
-func (pr *ProjectRepository) GetOverview(id string) (*model.Project, error) {
+// 3b73b142-13c7-4e9b-b89c-22a4b6d45c9f
+func (pr *ProjectRepository) GetOverview(endpoint string) (*model.Project, error) {
 	query := `
 	SELECT endpoint, title, description, archived, created_at, visited_at 
-	FROM project where id = ?
+	FROM project where endpoint = ?
 	`
-	var project *model.Project
-	err := pr.db.Get(project, query, id)
+	var proj *model.Project
+	err := pr.db.Get(proj, query, endpoint)
 	if err != nil {
 		return nil, err
 	}
-	return project, nil
+	return proj, nil
 }
 
-func (pr *ProjectRepository) GetDetail(id string) (*model.Project, error) {
-	var project *model.Project
+func (pr *ProjectRepository) GetDetail(endpoint string) (*model.Project, error) {
+	var proj *model.Project
 	var fields []model.Field
-	projErr := pr.db.Get(project, `SELECT * FROM project WHERE id = ?`, id)
+	projErr := pr.db.Get(proj, `SELECT * FROM project WHERE endpoint = ?`, endpoint)
 	if projErr != nil {
 		return nil, projErr
 	}
-	fieldErr := pr.db.Select(&fields, `SELECT * FROM field WHERE project_id = ?`, id)
+	fieldErr := pr.db.Select(&fields, `SELECT * FROM field WHERE project_id = ?`, proj)
 	if fieldErr != nil {
 		return nil, fieldErr
 	}
-	return project, nil
+	return proj, nil
 }
 
 func (pr *ProjectRepository) Create() error {
