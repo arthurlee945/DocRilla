@@ -16,6 +16,6 @@ type Project struct {
 	VisitedAt   sql.NullTime `db:"visited_at"`
 	CreatedAt   time.Time    `db:"created_at"`
 	UpdatedAt   time.Time    `db:"updated_at"`
-	User        User
-	Fields      []Field
+	*User
+	Fields *[]Field
 }

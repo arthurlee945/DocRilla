@@ -20,7 +20,7 @@ type Account struct {
 	Scope             sql.NullString
 	IDToken           sql.NullString `db:"id_token"`
 	SessionState      sql.NullString `db:"session_state"`
-	User
+	*User
 }
 
 type User struct {
@@ -46,7 +46,7 @@ type Session struct {
 	ID           uint64
 	SessionToken string `db:"session_token"`
 	Expires      time.Time
-	User
+	*User
 }
 
 type VerificationToken struct {

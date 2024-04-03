@@ -31,12 +31,12 @@ func (pr *ProjectRepository) GetOverview(endpoint string) (*model.Project, error
 
 func (pr *ProjectRepository) GetDetail(endpoint string) (*model.Project, error) {
 	proj := new(model.Project)
-	fields := []model.Field{}
+	fields := new([]model.Field)
 	projErr := pr.db.Get(proj, `SELECT * FROM project WHERE endpoint = $1`, endpoint)
 	if projErr != nil {
 		return nil, projErr
 	}
-	fieldErr := pr.db.Select(&fields, `SELECT * FROM field WHERE project_id = $1`, proj.ID)
+	fieldErr := pr.db.Select(fields, `SELECT * FROM field WHERE project_id = $1`, proj.ID)
 	if fieldErr != nil {
 		return nil, fieldErr
 	}
