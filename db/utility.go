@@ -56,7 +56,7 @@ func Seed(db *sqlx.DB) error {
 	return nil
 }
 
-func DropAll(db *sqlx.DB) error {
+func DropAllTable(db *sqlx.DB) error {
 	if _, err := db.Exec(`
 DROP Table IF EXISTS account, field, project, session, usr, verification_token;
 DROP Type IF EXISTS user_role, role, project_type, type;
