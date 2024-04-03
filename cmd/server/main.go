@@ -23,8 +23,8 @@ func main() {
 	}
 	defer dbConn.Close()
 	// db.InitializeTable(dbConn)
-	// dbConn.Exec(`
-	// DROP Table IF EXISTS account, field, project, session, usr, verification_token;
-	// DROP Type IF EXISTS user_role, role, project_type, type;
-	// `)
+	if seedErr := db.Seed(dbConn); seedErr != nil {
+		log.Fatalln(seedErr)
+	}
+
 }
