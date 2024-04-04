@@ -47,5 +47,9 @@ func (pr *ProjectStore) GetDetail(ctx context.Context, user *model.User, endpoin
 }
 
 func (pr *ProjectStore) Create(ctx context.Context, user *model.User, proj *model.Project) error {
+	query := `INSERT INTO project (endpoint, user_id, title, description, documentUrl) VALUES (:endpoint, :user_id, :title, :description, :documentUrl)`
+	if _, err := pr.db.NamedExecContext(ctx, query, proj); err != nil {
+		return err
+	}
 	return nil
 }

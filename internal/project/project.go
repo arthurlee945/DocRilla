@@ -5,5 +5,5 @@ import (
 )
 
 type Project struct {
-	store store.ProjectStore
+	store *store.ProjectStore
 }

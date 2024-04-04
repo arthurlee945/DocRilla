@@ -1,4 +1,4 @@
-package repo
+package store
 
 import (
 	"context"
@@ -7,17 +7,17 @@ import (
 	"github.com/arthurlee945/Docrilla/internal/model"
 )
 
-type UserRepository struct {
+type UserStore struct {
 	db *sql.DB
 }
 
-func NewUserRepository(db *sql.DB) *UserRepository {
-	return &UserRepository{
+func NewUserStore(db *sql.DB) *UserStore {
+	return &UserStore{
 		db,
 	}
 }
 
-func (ur *UserRepository) Get(ctx context.Context, userId string) (*model.User, error) {
+func (ur *UserStore) Get(ctx context.Context, userId string) (*model.User, error) {
 	query := `
 	SELECT uuid, name 
 	FROM users
