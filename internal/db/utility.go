@@ -1,12 +1,13 @@
 package db
 
 import (
-	"github.com/arthurlee945/Docrilla/model"
+	"os"
+
 	"github.com/jmoiron/sqlx"
 )
 
 func InitializeTable(db *sqlx.DB) error {
-	qs, err := model.GetQueryString()
+	qs, err := GetMigrationString()
 	if err != nil {
 		return err
 	}
@@ -64,4 +65,16 @@ DROP Type IF EXISTS user_role, role, project_type, type;
 		return err
 	}
 	return nil
+}
+
+func GetMigrationString() (string, error) {
+	wd, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+	dat, err := os.ReadFile(wd + "/migration/migration.sql")
+	if err != nil {
+		return "", err
+	}
+	return string(dat), nil
 }

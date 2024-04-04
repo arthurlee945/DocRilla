@@ -1,9 +1,10 @@
 package repo
 
 import (
+	"context"
 	"database/sql"
 
-	"github.com/arthurlee945/Docrilla/model"
+	"github.com/arthurlee945/Docrilla/internal/model"
 )
 
 type UserRepository struct {
@@ -16,7 +17,7 @@ func NewUserRepository(db *sql.DB) *UserRepository {
 	}
 }
 
-func (ur *UserRepository) Get(userId string) (*model.User, error) {
+func (ur *UserRepository) Get(ctx context.Context, userId string) (*model.User, error) {
 	query := `
 	SELECT uuid, name 
 	FROM users
@@ -26,7 +27,7 @@ func (ur *UserRepository) Get(userId string) (*model.User, error) {
 		uuid string
 		name string
 	)
-	err := ur.db.QueryRow(query, userId).Scan(&uuid, &name)
+	err := ur.db.QueryRowContext(ctx, query, userId).Scan(&uuid, &name)
 	if err != nil {
 		return nil, err
 	}
