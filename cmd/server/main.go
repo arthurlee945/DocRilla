@@ -28,9 +28,9 @@ func main() {
 	defer dbConn.Close()
 
 	//TESTING BLOCK
-	projRepo := projStore.NewProjectStore(dbConn)
+	projRepo := projStore.NewStore(dbConn)
 
-	proj, projErr := projRepo.GetDetail(context.Background(), &model.User{ID: 10}, "018ea1b1-b9ba-79af-81ce-81bae9930afa")
+	proj, projErr := projRepo.GetProjectDetail(context.Background(), &model.User{ID: 10}, "018ea1b1-b9ba-79af-81ce-81bae9930afa")
 	if projErr != nil {
 		fmt.Println("Query Errored")
 		log.Fatalln(projErr)
