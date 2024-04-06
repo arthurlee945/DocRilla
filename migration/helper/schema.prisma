@@ -39,12 +39,12 @@ model usr {
   email_verified           Boolean?  @default(false)
   email_verification_token String?
   password                 String?
-  role                     user_role      @default(USER)
+  role                     user_role @default(USER)
   password_changed_at      DateTime?
   reset_password_token     String?
   reset_password_expires   DateTime?
   created_at               DateTime  @default(now())
-  updated_at               DateTime  @updatedAt @default(now())
+  updated_at               DateTime  @default(now()) @updatedAt
   active                   Boolean   @default(true)
   accounts                 account[]
   sessions                 session[]
@@ -74,24 +74,26 @@ enum project_type {
 }
 
 model project {
-  id           Int       @id @default(autoincrement())
+  id           Int          @id @default(autoincrement())
   user_id      Int
-  endpoint     String    @default(cuid())
+  endpoint     String       @default(cuid())
   title        String
   description  String?
   document_url String
-  archived     Boolean   @default(false)
+  archived     Boolean      @default(false)
   visited_at   DateTime?
-  created_at   DateTime  @default(now())
-  updated_at   DateTime  @updatedAt @default(now())
+  created_at   DateTime     @default(now())
+  updated_at   DateTime     @default(now()) @updatedAt
   fields       field[]
-  user         usr       @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  submissions  submission[]
+  user         usr          @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@unique([endpoint])
 }
 
 model field {
-  id         Int     @id @default(autoincrement())
+  id         Int               @id @default(autoincrement())
+  uuid       String            @default(uuid())
   project_id Int
   x1         Float
   y1         Float
@@ -99,6 +101,23 @@ model field {
   y2         Float
   page       Int
   type       project_type
-  value      Bytes
-  project    project @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  fields     submitted_field[]
+  project    project           @relation(fields: [project_id], references: [id], onDelete: Cascade)
+}
+
+model submission {
+  id               Int               @id @default(autoincrement())
+  project_id       Int
+  submitted_at     DateTime          @default(now())
+  submitted_fields submitted_field[]
+  project          project           @relation(fields: [project_id], references: [id], onDelete: Cascade)
+}
+
+model submitted_field {
+  id            Int        @id @default(autoincrement())
+  field_id      Int
+  submission_id Int
+  value         Bytes
+  submission    submission @relation(fields: [submission_id], references: [id], onDelete: Cascade)
+  field         field      @relation(fields: [field_id], references: [id], onDelete: Cascade)
 }
