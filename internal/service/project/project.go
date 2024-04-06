@@ -7,8 +7,8 @@ import (
 )
 
 type Store interface {
-	GetProjectOverview(ctx context.Context, user *model.User, endpoint string) (*model.Project, error)
-	GetProjectDetail(ctx context.Context, user *model.User, endpoint string) (*model.Project, error)
+	GetProjectOverview(ctx context.Context, user *model.User, uuid string) (*model.Project, error)
+	GetProjectDetail(ctx context.Context, user *model.User, uuid string) (*model.Project, error)
 	CreateProject(ctx context.Context, user *model.User, proj *model.Project) (string, error)
 	UpdateProject(ctx context.Context, user *model.User, proj *model.Project) error
 }

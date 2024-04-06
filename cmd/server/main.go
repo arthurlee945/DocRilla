@@ -1,14 +1,10 @@
 package main
 
 import (
-	"context"
-	"fmt"
 	"log"
 
 	"github.com/arthurlee945/Docrilla/config"
 	"github.com/arthurlee945/Docrilla/internal/db"
-	"github.com/arthurlee945/Docrilla/internal/model"
-	projStore "github.com/arthurlee945/Docrilla/internal/project/store"
 )
 
 var cfg *config.Config
@@ -27,14 +23,16 @@ func main() {
 	}
 	defer dbConn.Close()
 
-	//TESTING BLOCK
-	projRepo := projStore.NewStore(dbConn)
+	db.DropAllTable(dbConn)
 
-	proj, projErr := projRepo.GetProjectDetail(context.Background(), &model.User{ID: 10}, "018ea1b1-b9ba-79af-81ce-81bae9930afa")
-	if projErr != nil {
-		fmt.Println("Query Errored")
-		log.Fatalln(projErr)
-	}
-	fmt.Printf("%+v\n", proj)
+	// //TESTING BLOCK
+	// projRepo := stor.NewStore(dbConn)
+
+	// proj, projErr := projRepo.GetProjectDetail(context.Background(), &model.User{ID: 10}, "018ea1b1-b9ba-79af-81ce-81bae9930afa")
+	// if projErr != nil {
+	// 	fmt.Println("Query Errored")
+	// 	log.Fatalln(projErr)
+	// }
+	// fmt.Printf("%+v\n", proj)
 
 }

@@ -20,10 +20,18 @@
 
 ## Overview
 
-This package contains api endpoint to be used for document generation.
+This package contains api endpoint (project uuid) to be used for document generation.
 
 **Run below for local instance**
 
 ```
 make <EXAMPLE NAME>
+```
+
+### config requirement
+
+needs config.yaml file in config folder with
+
+```yaml
+dsn: postgresql://postgres:qUYeJjEaplvxfHDhWevbUzUECPRDmJkQ@roundhouse.proxy.rlwy.net:17037/railway
 ```

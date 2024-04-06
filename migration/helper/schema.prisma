@@ -76,7 +76,7 @@ enum project_type {
 model project {
   id           Int          @id @default(autoincrement())
   user_id      Int
-  endpoint     String       @default(cuid())
+  uuid         String       @unique @default(uuid())
   title        String
   description  String?
   document_url String
@@ -87,13 +87,11 @@ model project {
   fields       field[]
   submissions  submission[]
   user         usr          @relation(fields: [user_id], references: [id], onDelete: Cascade)
-
-  @@unique([endpoint])
 }
 
 model field {
   id         Int               @id @default(autoincrement())
-  uuid       String            @default(uuid())
+  uuid       String            @unique @default(uuid())
   project_id Int
   x1         Float
   y1         Float

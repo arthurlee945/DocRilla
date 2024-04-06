@@ -1,6 +1,8 @@
 bin
 tmp
 .env
+**/*.config.yaml
+!sample.config.yaml
 node_modules
 pnpm-lock.yaml
 migrations

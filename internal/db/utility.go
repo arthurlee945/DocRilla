@@ -35,9 +35,9 @@ func Seed(db *sqlx.DB) error {
 
 	var projID int
 	projInsert := `
-	INSERT INTO project (user_id, endpoint, title, description, document_url) VALUES ($1, $2, $3, $4, $5) RETURNING id
+	INSERT INTO project (user_id, title, description, document_url) VALUES ($1, $3, $4, $5) RETURNING id
 	`
-	pErr := db.QueryRow(projInsert, userID, "018ea1b1-b9ba-79af-81ce-81bae9930afa", "SAMPLE TITLE", "SAMPLE DESCRIPTION", "NO URL").Scan(&projID)
+	pErr := db.QueryRow(projInsert, userID, "SAMPLE TITLE", "SAMPLE DESCRIPTION", "NO URL").Scan(&projID)
 	if pErr != nil {
 		return pErr
 	}
@@ -59,7 +59,7 @@ func Seed(db *sqlx.DB) error {
 
 func DropAllTable(db *sqlx.DB) error {
 	if _, err := db.Exec(`
-DROP Table IF EXISTS account, field, project, session, usr, verification_token;
+DROP Table IF EXISTS account, field, project, session, usr, verification_token, submission, submitted_field;
 DROP Type IF EXISTS user_role, role, project_type, type;
 	`); err != nil {
 		return err
