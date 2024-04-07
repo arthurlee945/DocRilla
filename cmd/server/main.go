@@ -1,23 +1,22 @@
 package main
 
 import (
+	"context"
 	"log"
 
-	"github.com/arthurlee945/Docrilla/config"
+	"github.com/arthurlee945/Docrilla/internal/config"
+
 	"github.com/arthurlee945/Docrilla/internal/db"
 )
 
-var cfg *config.Config
-
-func init() {
-	if err := config.Initialize(".env"); err != nil {
-		log.Println("No .env file found")
-	}
-	cfg = config.New()
-}
+// https://grafana.com/blog/2024/02/09/how-i-write-http-services-in-go-after-13-years/
 
 func main() {
-	dbConn, err := db.Connect(cfg.DatabaseUrl)
+	cfg, err := config.Load(context.Background())
+	if err != nil {
+		log.Fatalln(err)
+	}
+	dbConn, err := db.Connect(cfg.DSN)
 	if err != nil {
 		log.Fatalln(err)
 	}
