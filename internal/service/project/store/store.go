@@ -3,8 +3,13 @@ package store
 import (
 	"context"
 
+	"github.com/arthurlee945/Docrilla/internal/errors"
 	"github.com/arthurlee945/Docrilla/internal/model"
 	"github.com/jmoiron/sqlx"
+)
+
+const (
+	ErrProjectFailedUpdate = errors.Error("project_failed_update: project couldn't update.")
 )
 
 type Store struct {
@@ -64,5 +69,15 @@ func (pr *Store) CreateProject(ctx context.Context, user *model.User, proj *mode
 }
 
 func (pr *Store) UpdateProject(ctx context.Context, user *model.User, proj *model.Project) error {
+	query := `UPDATE project
+	SET
+	title = COALESCE(:title, title),
+	description = COALESCE(:description, description),
+	document_url = COALESCE(:document_url, document_url),
+	archived = COALESCE(:archived, archived),
+	visitedAt = COALESCE(:visted_at, visted_at)
+	WHERE id = :id AND user_id = :user_id
+	RETURNING *
+	`
 	return nil
 }

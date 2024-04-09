@@ -14,7 +14,7 @@ const loggerKey contextKey = iota
 
 var defaultLogger = zap.New(zapcore.NewCore(
 	zapcore.NewJSONEncoder(zapcore.EncoderConfig{
-		TimeKey:        "@timestamp",
+		TimeKey:        "timestamp",
 		LevelKey:       "level",
 		NameKey:        "logger",
 		CallerKey:      "caller",
