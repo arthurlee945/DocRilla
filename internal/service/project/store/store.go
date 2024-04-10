@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"sync"
 
 	"github.com/arthurlee945/Docrilla/internal/errors"
 	"github.com/arthurlee945/Docrilla/internal/model"
@@ -9,6 +10,7 @@ import (
 )
 
 const (
+	ErrProjectFailedCreate = errors.Error("project_failed_create: project couldn't be created.")
 	ErrProjectFailedUpdate = errors.Error("project_failed_update: project couldn't update.")
 )
 
@@ -57,27 +59,74 @@ func (pr *Store) CreateProject(ctx context.Context, user *model.User, proj *mode
 		return "", err
 	}
 	defer rows.Close()
-	var uuid string
-	for rows.Next() {
-		err = rows.Scan(uuid)
-		break
+	if !rows.Next() {
+		return "", ErrProjectFailedCreate.Wrap(errors.ErrNotFound)
 	}
-	if err != nil {
-		return "", err
+	var uuid string
+	if err := rows.Scan(uuid); err != nil {
+		return "", errors.ErrUnknown.Wrap(err)
 	}
 	return uuid, nil
 }
 
 func (pr *Store) UpdateProject(ctx context.Context, user *model.User, proj *model.Project) error {
-	query := `UPDATE project
-	SET
-	title = COALESCE(:title, title),
-	description = COALESCE(:description, description),
-	document_url = COALESCE(:document_url, document_url),
-	archived = COALESCE(:archived, archived),
-	visitedAt = COALESCE(:visted_at, visted_at)
-	WHERE id = :id AND user_id = :user_id
-	RETURNING *
-	`
-	return nil
+	tx, err := pr.db.Beginx()
+	if err != nil {
+		return err
+	}
+
+	txCtx, cancel := context.WithCancel(ctx)
+
+	errChan := make(chan error)
+	waitChan := make(chan struct{})
+
+	wg := sync.WaitGroup{}
+	wg.Add(len(*proj.Fields) + 1)
+	go func() {
+		go func() {
+			projQuery := `UPDATE project
+			SET
+			title = COALESCE(:title, title),
+			description = COALESCE(:description, description),
+			document_url = COALESCE(:document_url, document_url),
+			archived = COALESCE(:archived, archived),
+			visitedAt = COALESCE(:visted_at, visted_at)
+			WHERE id = :id AND user_id = :user_id
+			`
+			if _, err := tx.NamedExecContext(txCtx, projQuery, proj); err != nil {
+				cancel()
+				errChan <- err
+			}
+			wg.Done()
+		}()
+
+		fieldQuery := `UPDATE field
+		SET
+		x1 = COALESCE(:x1, x1),
+		y1 = COALESCE(:y1, y1),
+		x2 = COALESCE(:x2, x2),
+		y2 = COALESCE(:y2, y2),
+		page = COALESCE(:page, page),
+		WHERE id = :id AND project_id = :project_id
+		`
+		for field := range *proj.Fields {
+			go func() {
+				if _, err := tx.NamedExecContext(txCtx, fieldQuery, field); err != nil {
+					cancel()
+					errChan <- err
+				}
+				wg.Done()
+			}()
+		}
+
+		wg.Wait()
+		close(waitChan)
+	}()
+
+	select {
+	case err := <-errChan:
+		return err
+	case <-waitChan:
+		return nil
+	}
 }
