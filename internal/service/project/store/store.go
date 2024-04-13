@@ -84,7 +84,9 @@ func (pr *Store) UpdateProject(ctx context.Context, user *model.User, proj *mode
 	wg.Add(len(*proj.Fields) + 1)
 	go func() {
 		go func() {
-			projQuery := `UPDATE project
+
+			if _, err := tx.NamedExecContext(txCtx,
+				`UPDATE project
 			SET
 			title = COALESCE(:title, title),
 			description = COALESCE(:description, description),
@@ -92,26 +94,26 @@ func (pr *Store) UpdateProject(ctx context.Context, user *model.User, proj *mode
 			archived = COALESCE(:archived, archived),
 			visitedAt = COALESCE(:visted_at, visted_at)
 			WHERE id = :id AND user_id = :user_id
-			`
-			if _, err := tx.NamedExecContext(txCtx, projQuery, proj); err != nil {
+			`, proj); err != nil {
 				cancel()
 				errChan <- err
 			}
 			wg.Done()
 		}()
 
-		fieldQuery := `UPDATE field
-		SET
-		x1 = COALESCE(:x1, x1),
-		y1 = COALESCE(:y1, y1),
-		x2 = COALESCE(:x2, x2),
-		y2 = COALESCE(:y2, y2),
-		page = COALESCE(:page, page),
-		WHERE id = :id AND project_id = :project_id
-		`
 		for field := range *proj.Fields {
 			go func() {
-				if _, err := tx.NamedExecContext(txCtx, fieldQuery, field); err != nil {
+				if _, err := tx.NamedExecContext(txCtx,
+					`UPDATE field
+				SET
+				x1 = COALESCE(:x1, x1),
+				y1 = COALESCE(:y1, y1),
+				x2 = COALESCE(:x2, x2),
+				y2 = COALESCE(:y2, y2),
+				page = COALESCE(:page, page),
+				WHERE id = :id AND project_id = :project_id
+				`,
+					field); err != nil {
 					cancel()
 					errChan <- err
 				}
@@ -125,8 +127,12 @@ func (pr *Store) UpdateProject(ctx context.Context, user *model.User, proj *mode
 
 	select {
 	case err := <-errChan:
-		return err
+		tx.Rollback()
+		return ErrProjectFailedUpdate.Wrap(err)
 	case <-waitChan:
+		if err := tx.Commit(); err != nil {
+			return ErrProjectFailedUpdate.Wrap(err)
+		}
 		return nil
 	}
 }
