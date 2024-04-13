@@ -22,9 +22,6 @@ func main() {
 	}
 	defer dbConn.Close()
 
-	if err := db.Seed(dbConn); err != nil {
-		log.Fatalln(err)
-	}
 	// //TESTING BLOCK
 	// projRepo := stor.NewStore(dbConn)
 
