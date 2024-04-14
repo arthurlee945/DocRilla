@@ -27,9 +27,9 @@ func NewStore(db *sqlx.DB) *Store {
 	}
 }
 
-func (pr *Store) GetProjectOverview(ctx context.Context, user *model.User, uuid string) (*model.Project, error) {
+func (ps *Store) GetProjectOverview(ctx context.Context, user *model.User, uuid string) (*model.Project, error) {
 	proj := new(model.Project)
-	if err := pr.db.GetContext(ctx, proj, `
+	if err := ps.db.GetContext(ctx, proj, `
 	SELECT uuid, title, description, archived, created_at, visited_at 
 	FROM project WHERE uuid = $1 AND user_id = $2
 	`, uuid, user.ID); err != nil {
@@ -38,20 +38,20 @@ func (pr *Store) GetProjectOverview(ctx context.Context, user *model.User, uuid 
 	return proj, nil
 }
 
-func (pr *Store) GetProjectDetail(ctx context.Context, user *model.User, uuid string) (*model.Project, error) {
+func (ps *Store) GetProjectDetail(ctx context.Context, user *model.User, uuid string) (*model.Project, error) {
 	proj, fields := new(model.Project), new([]model.Field)
-	if err := pr.db.GetContext(ctx, proj, `SELECT * FROM project WHERE uuid = $1 AND user_id = $2`, uuid, user.ID); err != nil {
+	if err := ps.db.GetContext(ctx, proj, `SELECT * FROM project WHERE uuid = $1 AND user_id = $2`, uuid, user.ID); err != nil {
 		return nil, err
 	}
-	if err := pr.db.SelectContext(ctx, fields, `SELECT * FROM field WHERE project_id = $1`, proj.ID); err != nil {
+	if err := ps.db.SelectContext(ctx, fields, `SELECT * FROM field WHERE project_id = $1`, proj.ID); err != nil {
 		return nil, err
 	}
 	proj.Fields = fields
 	return proj, nil
 }
 
-func (pr *Store) CreateProject(ctx context.Context, user *model.User, proj *model.Project) (string, error) {
-	rows, err := pr.db.NamedQueryContext(ctx, `
+func (ps *Store) CreateProject(ctx context.Context, user *model.User, proj *model.Project) (string, error) {
+	rows, err := ps.db.NamedQueryContext(ctx, `
 		INSERT INTO project ( user_id, title, description, documentUrl) 
 		VALUES (:user_id, :title, :description, :documentUrl) RETURNING uuid
 		`, proj)
@@ -69,10 +69,10 @@ func (pr *Store) CreateProject(ctx context.Context, user *model.User, proj *mode
 	return uuid, nil
 }
 
-func (pr *Store) UpdateProject(ctx context.Context, user *model.User, proj *model.Project) error {
+func (ps *Store) UpdateProject(ctx context.Context, user *model.User, proj *model.Project) error {
 	txCtx, txCancel := context.WithCancel(ctx)
 	defer txCancel()
-	tx, err := pr.db.BeginTxx(txCtx, &sql.TxOptions{})
+	tx, err := ps.db.BeginTxx(txCtx, &sql.TxOptions{})
 	if err != nil {
 		return err
 	}
@@ -139,9 +139,9 @@ func (pr *Store) UpdateProject(ctx context.Context, user *model.User, proj *mode
 	}
 }
 
-func (pr *Store) DeleteProject(ctx context.Context, user *model.User, proj *model.Project) error {
+func (ps *Store) DeleteProject(ctx context.Context, user *model.User, proj *model.Project) error {
 	proj.UserID = user.ID
-	if _, err := pr.db.NamedExecContext(ctx, `
+	if _, err := ps.db.NamedExecContext(ctx, `
 	DELETE FROM project
 	WHERE uuid = :uuid AND user_id = :user_id
 	`, proj); err != nil {
