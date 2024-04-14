@@ -38,8 +38,8 @@ func (pr *Store) GetProjectOverview(ctx context.Context, user *model.User, uuid 
 }
 
 func (pr *Store) GetProjectDetail(ctx context.Context, user *model.User, uuid string) (*model.Project, error) {
-	var proj, fields = new(model.Project), new([]model.Field)
-	var errChan, projChan = make(chan error), make(chan *model.Project)
+	proj, fields := new(model.Project), new([]model.Field)
+	errChan, projChan := make(chan error), make(chan *model.Project)
 	projCtx, projCtxCancel := context.WithCancel(ctx)
 	defer projCtxCancel()
 
@@ -99,7 +99,7 @@ func (pr *Store) UpdateProject(ctx context.Context, user *model.User, proj *mode
 	}
 	defer tx.Rollback()
 
-	var errChan, waitChan = make(chan error), make(chan struct{})
+	errChan, waitChan := make(chan error), make(chan struct{})
 
 	wg := sync.WaitGroup{}
 	wg.Add(len(*proj.Fields) + 1)
