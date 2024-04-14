@@ -11,8 +11,10 @@ import (
 )
 
 const (
+	ErrProjectFailedGet    = errors.Error("project_failed_get: couldn't find the project.")
 	ErrProjectFailedCreate = errors.Error("project_failed_create: project couldn't be created.")
 	ErrProjectFailedUpdate = errors.Error("project_failed_update: project couldn't update.")
+	ErrProjectFailedDelete = errors.Error("project_failed_delete: project couldn't delete.")
 )
 
 type Store struct {
@@ -27,11 +29,10 @@ func NewStore(db *sqlx.DB) *Store {
 
 func (pr *Store) GetProjectOverview(ctx context.Context, user *model.User, uuid string) (*model.Project, error) {
 	proj := new(model.Project)
-	err := pr.db.GetContext(ctx, proj, `
+	if err := pr.db.GetContext(ctx, proj, `
 	SELECT uuid, title, description, archived, created_at, visited_at 
 	FROM project WHERE uuid = $1 AND user_id = $2
-	`, uuid, user.ID)
-	if err != nil {
+	`, uuid, user.ID); err != nil {
 		return nil, err
 	}
 	return proj, nil
@@ -39,36 +40,14 @@ func (pr *Store) GetProjectOverview(ctx context.Context, user *model.User, uuid 
 
 func (pr *Store) GetProjectDetail(ctx context.Context, user *model.User, uuid string) (*model.Project, error) {
 	proj, fields := new(model.Project), new([]model.Field)
-	errChan, projChan := make(chan error), make(chan *model.Project)
-	projCtx, projCtxCancel := context.WithCancel(ctx)
-	defer projCtxCancel()
-
-	wg := sync.WaitGroup{}
-	wg.Add(2)
-	go func() {
-		go func() {
-			defer wg.Done()
-			if err := pr.db.GetContext(projCtx, proj, `SELECT * FROM project WHERE uuid = $1 AND user_id = $2`, uuid, user.ID); err != nil {
-				errChan <- err
-			}
-		}()
-		go func() {
-			defer wg.Done()
-			if err := pr.db.SelectContext(projCtx, fields, `SELECT * FROM field WHERE project_id = $1`, proj.ID); err != nil {
-				errChan <- err
-			}
-		}()
-		wg.Wait()
-		proj.Fields = fields
-		projChan <- proj
-	}()
-
-	select {
-	case err := <-errChan:
+	if err := pr.db.GetContext(ctx, proj, `SELECT * FROM project WHERE uuid = $1 AND user_id = $2`, uuid, user.ID); err != nil {
 		return nil, err
-	case proj := <-projChan:
-		return proj, nil
 	}
+	if err := pr.db.SelectContext(ctx, fields, `SELECT * FROM field WHERE project_id = $1`, proj.ID); err != nil {
+		return nil, err
+	}
+	proj.Fields = fields
+	return proj, nil
 }
 
 func (pr *Store) CreateProject(ctx context.Context, user *model.User, proj *model.Project) (string, error) {
@@ -158,4 +137,15 @@ func (pr *Store) UpdateProject(ctx context.Context, user *model.User, proj *mode
 		}
 		return nil
 	}
+}
+
+func (pr *Store) DeleteProject(ctx context.Context, user *model.User, proj *model.Project) error {
+	proj.UserID = user.ID
+	if _, err := pr.db.NamedExecContext(ctx, `
+	DELETE FROM project
+	WHERE uuid = :uuid AND user_id = :user_id
+	`, proj); err != nil {
+		return ErrProjectFailedDelete.Wrap(err)
+	}
+	return nil
 }

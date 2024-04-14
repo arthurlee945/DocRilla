@@ -8,7 +8,7 @@ import (
 type Project struct {
 	ID          uint64         `json:"id" db:"id"`
 	UUID        string         `json:"uuid" db:"uuid"`
-	UserID      int            `json:"userID" db:"user_id"`
+	UserID      uint64         `json:"userID" db:"user_id"`
 	Title       string         `json:"title" db:"title"`
 	Description sql.NullString `json:"description" db:"description"`
 	DocumentUrl string         `json:"documentUrl" db:"document_url"`

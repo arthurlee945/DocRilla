@@ -62,7 +62,7 @@ CREATE TABLE "verification_token" (
 CREATE TABLE "project" (
     "id" SERIAL NOT NULL,
     "user_id" INTEGER NOT NULL,
-    "uuid" TEXT NOT NULL DEFAULT gen_random_uuid(),
+    "uuid" UUID NOT NULL DEFAULT gen_random_uuid(),
     "title" TEXT NOT NULL,
     "description" TEXT,
     "document_url" TEXT NOT NULL,
@@ -77,7 +77,7 @@ CREATE TABLE "project" (
 -- CreateTable
 CREATE TABLE "field" (
     "id" SERIAL NOT NULL,
-    "uuid" TEXT NOT NULL DEFAULT gen_random_uuid(),
+    "uuid" UUID NOT NULL DEFAULT gen_random_uuid(),
     "project_id" INTEGER NOT NULL,
     "x1" DOUBLE PRECISION NOT NULL,
     "y1" DOUBLE PRECISION NOT NULL,
