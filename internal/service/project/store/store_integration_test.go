@@ -1,17 +1,20 @@
-package main
+package store_test
 
 import (
 	"context"
 	"log"
+	"testing"
 
 	"github.com/arthurlee945/Docrilla/internal/config"
-
 	"github.com/arthurlee945/Docrilla/internal/db"
+	"github.com/arthurlee945/Docrilla/internal/service/project/store"
 )
 
-// https://grafana.com/blog/2024/02/09/how-i-write-http-services-in-go-after-13-years/
+func TestGetProjectOverview(t *testing.T) {
+	projStore := getProjectStore()
+}
 
-func main() {
+func getProjectStore() *store.Store {
 	cfg, err := config.Load(context.Background())
 	if err != nil {
 		log.Fatalln(err)
@@ -21,5 +24,5 @@ func main() {
 		log.Fatalln(err)
 	}
 	defer dbConn.Close()
-
+	return store.NewStore(dbConn)
 }

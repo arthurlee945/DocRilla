@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"database/sql"
 	"sync"
 
 	"github.com/arthurlee945/Docrilla/internal/errors"
@@ -25,12 +26,11 @@ func NewStore(db *sqlx.DB) *Store {
 }
 
 func (pr *Store) GetProjectOverview(ctx context.Context, user *model.User, uuid string) (*model.Project, error) {
-	query := `
+	proj := new(model.Project)
+	err := pr.db.GetContext(ctx, proj, `
 	SELECT uuid, title, description, archived, created_at, visited_at 
 	FROM project WHERE uuid = $1 AND user_id = $2
-	`
-	proj := new(model.Project)
-	err := pr.db.GetContext(ctx, proj, query, uuid, user.ID)
+	`, uuid, user.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -38,23 +38,44 @@ func (pr *Store) GetProjectOverview(ctx context.Context, user *model.User, uuid 
 }
 
 func (pr *Store) GetProjectDetail(ctx context.Context, user *model.User, uuid string) (*model.Project, error) {
-	proj := new(model.Project)
-	fields := new([]model.Field)
-	projErr := pr.db.GetContext(ctx, proj, `SELECT * FROM project WHERE uuid = $1 AND user_id = $2`, uuid, user.ID)
-	if projErr != nil {
-		return nil, projErr
+	var proj, fields = new(model.Project), new([]model.Field)
+	var errChan, projChan = make(chan error), make(chan *model.Project)
+	projCtx, projCtxCancel := context.WithCancel(ctx)
+	defer projCtxCancel()
+
+	wg := sync.WaitGroup{}
+	wg.Add(2)
+	go func() {
+		go func() {
+			defer wg.Done()
+			if err := pr.db.GetContext(projCtx, proj, `SELECT * FROM project WHERE uuid = $1 AND user_id = $2`, uuid, user.ID); err != nil {
+				errChan <- err
+			}
+		}()
+		go func() {
+			defer wg.Done()
+			if err := pr.db.SelectContext(projCtx, fields, `SELECT * FROM field WHERE project_id = $1`, proj.ID); err != nil {
+				errChan <- err
+			}
+		}()
+		wg.Wait()
+		proj.Fields = fields
+		projChan <- proj
+	}()
+
+	select {
+	case err := <-errChan:
+		return nil, err
+	case proj := <-projChan:
+		return proj, nil
 	}
-	fieldErr := pr.db.SelectContext(ctx, fields, `SELECT * FROM field WHERE project_id = $1`, proj.ID)
-	if fieldErr != nil {
-		return nil, fieldErr
-	}
-	proj.Fields = fields
-	return proj, nil
 }
 
 func (pr *Store) CreateProject(ctx context.Context, user *model.User, proj *model.Project) (string, error) {
-	query := `INSERT INTO project ( user_id, title, description, documentUrl) VALUES (:user_id, :title, :description, :documentUrl) RETURNING uuid`
-	rows, err := pr.db.NamedQueryContext(ctx, query, proj)
+	rows, err := pr.db.NamedQueryContext(ctx, `
+		INSERT INTO project ( user_id, title, description, documentUrl) 
+		VALUES (:user_id, :title, :description, :documentUrl) RETURNING uuid
+		`, proj)
 	if err != nil {
 		return "", err
 	}
@@ -70,21 +91,24 @@ func (pr *Store) CreateProject(ctx context.Context, user *model.User, proj *mode
 }
 
 func (pr *Store) UpdateProject(ctx context.Context, user *model.User, proj *model.Project) error {
-	tx, err := pr.db.Beginx()
+	txCtx, txCancel := context.WithCancel(ctx)
+	defer txCancel()
+	tx, err := pr.db.BeginTxx(txCtx, &sql.TxOptions{})
 	if err != nil {
 		return err
 	}
+	defer tx.Rollback()
 
-	txCtx, cancel := context.WithCancel(ctx)
-
-	errChan := make(chan error)
-	waitChan := make(chan struct{})
+	var errChan, waitChan = make(chan error), make(chan struct{})
 
 	wg := sync.WaitGroup{}
 	wg.Add(len(*proj.Fields) + 1)
 	go func() {
 		go func() {
-
+			defer func() {
+				txCancel()
+				wg.Done()
+			}()
 			if _, err := tx.NamedExecContext(txCtx,
 				`UPDATE project
 			SET
@@ -95,14 +119,16 @@ func (pr *Store) UpdateProject(ctx context.Context, user *model.User, proj *mode
 			visitedAt = COALESCE(:visted_at, visted_at)
 			WHERE id = :id AND user_id = :user_id
 			`, proj); err != nil {
-				cancel()
 				errChan <- err
 			}
-			wg.Done()
 		}()
 
 		for field := range *proj.Fields {
 			go func() {
+				defer func() {
+					txCancel()
+					wg.Done()
+				}()
 				if _, err := tx.NamedExecContext(txCtx,
 					`UPDATE field
 				SET
@@ -114,10 +140,8 @@ func (pr *Store) UpdateProject(ctx context.Context, user *model.User, proj *mode
 				WHERE id = :id AND project_id = :project_id
 				`,
 					field); err != nil {
-					cancel()
 					errChan <- err
 				}
-				wg.Done()
 			}()
 		}
 
@@ -127,7 +151,6 @@ func (pr *Store) UpdateProject(ctx context.Context, user *model.User, proj *mode
 
 	select {
 	case err := <-errChan:
-		tx.Rollback()
 		return ErrProjectFailedUpdate.Wrap(err)
 	case <-waitChan:
 		if err := tx.Commit(); err != nil {
