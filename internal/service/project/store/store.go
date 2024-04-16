@@ -102,7 +102,8 @@ func (ps *Store) UpdateProject(ctx context.Context, user *model.User, proj *mode
 			}
 		}()
 
-		for field := range *proj.Fields {
+		for _, f := range *proj.Fields {
+			field := f
 			go func() {
 				defer func() {
 					txCancel()

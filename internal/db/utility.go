@@ -28,7 +28,7 @@ func InitializeTable(db *sqlx.DB) error {
 
 func Seed(db *sqlx.DB) error {
 	// USER GEN
-	var userID int
+	var userID uint64
 	uRows, err := db.NamedQuery(`
 	INSERT INTO usr (id, name, email, password, role)
 	VALUES (:id, :name, :email, :password, :role)
@@ -50,7 +50,7 @@ func Seed(db *sqlx.DB) error {
 	// Project Gen
 	var projID int
 	pRows, err := db.NamedQuery(`
-	INSERT INTO project (user_id, title, description, document_url) VALUES (:user_id, :title, :description, :document_url) RETURNING id
+	INSERT INTO project (id, user_id, uuid, title, description, document_url) VALUES (:id, :user_id, :uuid, :title, :description, :document_url) RETURNING id
 	`, test.Project)
 	if err != nil {
 		return ErrFailedToSeedDB.Wrap(err)
@@ -61,10 +61,10 @@ func Seed(db *sqlx.DB) error {
 	pRows.Close()
 
 	// Field Gen
-	for field := range []*model.Field{test.Field1, test.Field2} {
+	for _, field := range []*model.Field{test.Field1, test.Field2} {
 		if _, err := db.NamedExec(`
-		INSERT INTO field (project_id, x1, y1, x2, y2, page, type)
-		VALUES (:project_id, :x1, :y1, :x2, :y2, :page, :type)
+		INSERT INTO field (uuid, project_id, x1, y1, x2, y2, page, type)
+		VALUES (:uuid, :project_id, :x1, :y1, :x2, :y2, :page, :type)
 		`, field); err != nil {
 			return ErrFailedToSeedDB.Wrap(err)
 		}
