@@ -15,7 +15,7 @@ import (
 const DSN = "postgresql://public_user:Qwer1234@localhost:5432/docrilla?sslmode=disable"
 
 func TestGetProjectOverview(t *testing.T) {
-	sampleProj := &model.Project{
+	testProj := &model.Project{
 		UUID:        test.Project.UUID,
 		Title:       test.Project.Title,
 		Description: test.Project.Description,
@@ -31,8 +31,28 @@ func TestGetProjectOverview(t *testing.T) {
 		t.Errorf("Expected GetProjectOverview to return *model.Project. got = %+v", err)
 	}
 
-	if reflect.DeepEqual(proj, sampleProj) {
-		t.Errorf("Expected GetProjectOverview project to equal to test project expected = %+v, got = %+v", sampleProj, proj)
+	if proj.UUID == "" || proj.Title == "" || proj.Archived != false || proj.CreatedAt.IsZero() {
+		t.Errorf("Expected GetProjectOverview to return all values specified, but got = %+v", proj)
+	}
+	if reflect.DeepEqual(proj, testProj) {
+		t.Errorf("Expected GetProjectOverview project to equal to test project expected = %+v, got = %+v", testProj, proj)
+	}
+}
+
+func TestGetProjectDetail(t *testing.T) {
+	dbConn, store := storePrep(t)
+	defer dbConn.Close()
+	ctx := context.Background()
+	proj, err := store.GetProjectDetail(ctx, test.User, test.Project.UUID)
+	if err != nil {
+		t.Errorf("Expected GetProjectOverview to return *model.Project. got = %+v", err)
+	}
+	if proj.Title == "" || proj.DocumentUrl == "" || proj.CreatedAt.IsZero() || proj.UpdatedAt.IsZero() {
+		t.Errorf("Expected GetProjectDetail to contain proj base values, but got = %+v", proj)
+	}
+
+	if len(proj.Fields) != 2 {
+		t.Errorf("Expected GetProjectDetail to contain 2 fields, but got = %d", len(proj.Fields))
 	}
 }
 

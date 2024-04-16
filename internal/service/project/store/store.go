@@ -39,11 +39,11 @@ func (ps *Store) GetProjectOverview(ctx context.Context, user *model.User, uuid 
 }
 
 func (ps *Store) GetProjectDetail(ctx context.Context, user *model.User, uuid string) (*model.Project, error) {
-	proj, fields := new(model.Project), new([]model.Field)
+	proj, fields := new(model.Project), []model.Field{}
 	if err := ps.db.GetContext(ctx, proj, `SELECT * FROM project WHERE uuid = $1 AND user_id = $2`, uuid, user.ID); err != nil {
 		return nil, err
 	}
-	if err := ps.db.SelectContext(ctx, fields, `SELECT * FROM field WHERE project_id = $1`, proj.ID); err != nil {
+	if err := ps.db.SelectContext(ctx, &fields, `SELECT * FROM field WHERE project_id = $1`, proj.ID); err != nil {
 		return nil, err
 	}
 	proj.Fields = fields
@@ -81,7 +81,7 @@ func (ps *Store) UpdateProject(ctx context.Context, user *model.User, proj *mode
 	errChan, waitChan := make(chan error), make(chan struct{})
 
 	wg := sync.WaitGroup{}
-	wg.Add(len(*proj.Fields) + 1)
+	wg.Add(len(proj.Fields) + 1)
 	go func() {
 		go func() {
 			defer func() {
@@ -102,7 +102,7 @@ func (ps *Store) UpdateProject(ctx context.Context, user *model.User, proj *mode
 			}
 		}()
 
-		for _, f := range *proj.Fields {
+		for _, f := range proj.Fields {
 			field := f
 			go func() {
 				defer func() {
