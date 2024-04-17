@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "user_role" AS ENUM ('ADMIN', 'MODERATOR', 'USER', "MOCK");
+CREATE TYPE "user_role" AS ENUM ('ADMIN', 'MODERATOR', 'USER', 'MOCK');
 
 -- CreateEnum
 CREATE TYPE "project_type" AS ENUM ('TEXT', 'IMAGE', 'NUMBER');

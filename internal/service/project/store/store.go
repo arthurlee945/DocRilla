@@ -118,7 +118,7 @@ func (ps *Store) UpdateProject(ctx context.Context, user *model.User, proj *mode
 				y2 = COALESCE(:y2, y2),
 				page = COALESCE(:page, page),
 				type = COALESCE(:type, type)
-				WHERE id=:id AND project_id=:project_id
+				WHERE uuid=:uuid AND project_id=:project_id
 				`,
 					field); err != nil {
 					errChan <- errors.Error("Field Update Error").Wrap(err)

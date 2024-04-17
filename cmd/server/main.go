@@ -22,8 +22,13 @@ func main() {
 	}
 	defer dbConn.Close()
 
-	// db.DropAllTable(dbConn)
-	// db.InitializeTable(dbConn)
-	// db.Seed(dbConn)
-
+	// if err := db.DropAllTable(dbConn); err != nil {
+	// 	fmt.Println(err)
+	// }
+	// if err := db.InitializeTable(dbConn); err != nil {
+	// 	fmt.Println(err)
+	// }
+	// if err := db.Seed(dbConn); err != nil {
+	// 	fmt.Println(err)
+	// }
 }
