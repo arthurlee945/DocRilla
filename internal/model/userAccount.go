@@ -1,45 +1,45 @@
 package model
 
 import (
-	"database/sql"
 	"time"
 
 	"github.com/arthurlee945/Docrilla/internal/model/enum/user"
+	"github.com/arthurlee945/Docrilla/internal/model/null"
 )
 
 type Account struct {
-	ID                uint64         `json:"id" db:"id"`
-	UserID            uint64         `json:"userID" db:"user_id"`
-	Type              string         `json:"type" db:"type"`
-	Provide           string         `json:"provider" db:"provider"`
-	ProviderAccountID sql.NullString `json:"providerAccountID" db:"provider_account_id"`
-	RefreshToken      sql.NullString `json:"refreshToken" db:"refresh_token"`
-	AccessToken       sql.NullString `json:"accessToken" db:"access_token"`
-	ExpiresAt         sql.NullTime   `json:"expiresAt" db:"expires_at"`
-	TokenType         sql.NullString `json:"tokenType" db:"token_type"`
-	Scope             sql.NullString `json:"scope" db:"scope"`
-	IDToken           sql.NullString `json:"idToken" db:"id_token"`
-	SessionState      sql.NullString `json:"sessionState" db:"session_state"`
-	User              *User          `json:"user"`
+	ID                uint64      `json:"id" db:"id"`
+	UserID            uint64      `json:"userID" db:"user_id"`
+	Type              string      `json:"type" db:"type"`
+	Provide           string      `json:"provider" db:"provider"`
+	ProviderAccountID null.String `json:"providerAccountID" db:"provider_account_id"`
+	RefreshToken      null.String `json:"refreshToken" db:"refresh_token"`
+	AccessToken       null.String `json:"accessToken" db:"access_token"`
+	ExpiresAt         null.Time   `json:"expiresAt" db:"expires_at"`
+	TokenType         null.String `json:"tokenType" db:"token_type"`
+	Scope             null.String `json:"scope" db:"scope"`
+	IDToken           null.String `json:"idToken" db:"id_token"`
+	SessionState      null.String `json:"sessionState" db:"session_state"`
+	User              *User       `json:"user"`
 }
 
 type User struct {
-	ID                     uint64         `json:"id" db:"id"`
-	Name                   string         `json:"name" db:"name"`
-	Email                  string         `json:"email" db:"email"`
-	EmailVerified          bool           `json:"emailVerified" db:"email_verified"`
-	EmailVerificationToken sql.NullString `json:"emailVerificationToken" db:"email_verification_token"`
-	Password               sql.NullString `json:"password" db:"password"`
-	PasswordChangedAt      sql.NullTime   `json:"passwordChangedAt" db:"password_changed_at"`
-	ResetPasswordToken     sql.NullString `json:"resetPasswordToken" db:"reset_password_token"`
-	ResetPasswordExpires   sql.NullTime   `json:"resetPasswordExpires" db:"reset_password_expires"`
-	Role                   user.Role      `json:"role" db:"role"`
-	Active                 bool           `json:"active" db:"active"`
-	CreatedAt              time.Time      `json:"createdAt" db:"created_at"`
-	UpdatedAt              time.Time      `json:"updatedAt" db:"updated_at"`
-	Projects               []Project      `json:"projects"`
-	Accounts               []Account      `json:"accounts"`
-	Sessions               []Session      `json:"session"`
+	ID                     uint64      `json:"id" db:"id"`
+	Name                   string      `json:"name" db:"name"`
+	Email                  string      `json:"email" db:"email"`
+	EmailVerified          bool        `json:"emailVerified" db:"email_verified"`
+	EmailVerificationToken null.String `json:"emailVerificationToken" db:"email_verification_token"`
+	Password               null.String `json:"password" db:"password"`
+	PasswordChangedAt      null.Time   `json:"passwordChangedAt" db:"password_changed_at"`
+	ResetPasswordToken     null.String `json:"resetPasswordToken" db:"reset_password_token"`
+	ResetPasswordExpires   null.Time   `json:"resetPasswordExpires" db:"reset_password_expires"`
+	Role                   user.Role   `json:"role" db:"role"`
+	Active                 bool        `json:"active" db:"active"`
+	CreatedAt              time.Time   `json:"createdAt" db:"created_at"`
+	UpdatedAt              time.Time   `json:"updatedAt" db:"updated_at"`
+	Projects               []Project   `json:"projects"`
+	Accounts               []Account   `json:"accounts"`
+	Sessions               []Session   `json:"session"`
 }
 
 type Session struct {

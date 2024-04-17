@@ -50,23 +50,23 @@ func (ps *Store) GetProjectDetail(ctx context.Context, user *model.User, uuid st
 	return proj, nil
 }
 
-func (ps *Store) CreateProject(ctx context.Context, user *model.User, proj *model.Project) (string, error) {
+func (ps *Store) CreateProject(ctx context.Context, user *model.User, proj *model.Project) (*model.Project, error) {
 	rows, err := ps.db.NamedQueryContext(ctx, `
-		INSERT INTO project ( user_id, title, description, documentUrl) 
-		VALUES (:user_id, :title, :description, :documentUrl) RETURNING uuid
+		INSERT INTO project ( user_id, title, description, document_url) 
+		VALUES (:user_id, :title, :description, :document_url) RETURNING *
 		`, proj)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	defer rows.Close()
 	if !rows.Next() {
-		return "", ErrProjectFailedCreate.Wrap(errors.ErrNotFound)
+		return nil, ErrProjectFailedCreate.Wrap(errors.ErrNotFound)
 	}
-	var uuid string
-	if err := rows.Scan(uuid); err != nil {
-		return "", errors.ErrUnknown.Wrap(err)
+	newProj := new(model.Project)
+	if err := rows.StructScan(newProj); err != nil {
+		return nil, errors.ErrUnknown.Wrap(err)
 	}
-	return uuid, nil
+	return newProj, nil
 }
 
 func (ps *Store) UpdateProject(ctx context.Context, user *model.User, proj *model.Project) error {
@@ -77,7 +77,7 @@ func (ps *Store) UpdateProject(ctx context.Context, user *model.User, proj *mode
 		return err
 	}
 	defer tx.Rollback()
-
+	proj.UserID = user.ID
 	errChan, waitChan := make(chan error), make(chan struct{})
 
 	wg := sync.WaitGroup{}
@@ -95,10 +95,10 @@ func (ps *Store) UpdateProject(ctx context.Context, user *model.User, proj *mode
 			description = COALESCE(:description, description),
 			document_url = COALESCE(:document_url, document_url),
 			archived = COALESCE(:archived, archived),
-			visitedAt = COALESCE(:visted_at, visted_at)
-			WHERE id = :id AND user_id = :user_id
+			visitedAt = COALESCE(:visited_at, visited_at)
+			WHERE id=:id AND user_id=:user_id
 			`, proj); err != nil {
-				errChan <- err
+				errChan <- errors.Error("Project Update Error").Wrap(err)
 			}
 		}()
 
@@ -117,10 +117,11 @@ func (ps *Store) UpdateProject(ctx context.Context, user *model.User, proj *mode
 				x2 = COALESCE(:x2, x2),
 				y2 = COALESCE(:y2, y2),
 				page = COALESCE(:page, page),
-				WHERE id = :id AND project_id = :project_id
+				type = COALESCE(:type, type)
+				WHERE id=:id AND project_id=:project_id
 				`,
 					field); err != nil {
-					errChan <- err
+					errChan <- errors.Error("Field Update Error").Wrap(err)
 				}
 			}()
 		}

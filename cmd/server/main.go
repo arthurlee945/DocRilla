@@ -22,7 +22,8 @@ func main() {
 	}
 	defer dbConn.Close()
 
-	db.DropAllTable(dbConn)
-	db.InitializeTable(dbConn)
-	db.Seed(dbConn)
+	// db.DropAllTable(dbConn)
+	// db.InitializeTable(dbConn)
+	// db.Seed(dbConn)
+
 }

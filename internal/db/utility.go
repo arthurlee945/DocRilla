@@ -5,7 +5,7 @@ import (
 
 	"github.com/arthurlee945/Docrilla/internal/errors"
 	"github.com/arthurlee945/Docrilla/internal/model"
-	"github.com/arthurlee945/Docrilla/internal/model/test"
+	"github.com/arthurlee945/Docrilla/internal/model/mock"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -33,7 +33,7 @@ func Seed(db *sqlx.DB) error {
 	INSERT INTO usr (id, name, email, password, role)
 	VALUES (:id, :name, :email, :password, :role)
 	RETURNING id
-	`, test.User)
+	`, mock.User)
 	if err != nil {
 		return ErrFailedToSeedDB.Wrap(err)
 	}
@@ -43,7 +43,7 @@ func Seed(db *sqlx.DB) error {
 	uRows.Close()
 
 	// Account Gen
-	if _, err := db.NamedExec(`INSERT INTO account (user_id, type, provider) VALUES (:user_id, :type, :provider)`, test.Account); err != nil {
+	if _, err := db.NamedExec(`INSERT INTO account (user_id, type, provider) VALUES (:user_id, :type, :provider)`, mock.Account); err != nil {
 		return ErrFailedToSeedDB.Wrap(err)
 	}
 
@@ -51,7 +51,7 @@ func Seed(db *sqlx.DB) error {
 	var projID int
 	pRows, err := db.NamedQuery(`
 	INSERT INTO project (id, user_id, uuid, title, description, document_url) VALUES (:id, :user_id, :uuid, :title, :description, :document_url) RETURNING id
-	`, test.Project)
+	`, mock.Project)
 	if err != nil {
 		return ErrFailedToSeedDB.Wrap(err)
 	}
@@ -61,7 +61,7 @@ func Seed(db *sqlx.DB) error {
 	pRows.Close()
 
 	// Field Gen
-	for _, field := range []*model.Field{test.Field1, test.Field2} {
+	for _, field := range []*model.Field{&mock.Field1, &mock.Field2} {
 		if _, err := db.NamedExec(`
 		INSERT INTO field (uuid, project_id, x1, y1, x2, y2, page, type)
 		VALUES (:uuid, :project_id, :x1, :y1, :x2, :y2, :page, :type)
