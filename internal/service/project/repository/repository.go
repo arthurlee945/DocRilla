@@ -1,4 +1,4 @@
-package store
+package repository
 
 import (
 	"context"
@@ -17,41 +17,41 @@ const (
 	ErrProjectFailedDelete = errors.Error("project_failed_delete: project couldn't delete.")
 )
 
-type Store struct {
+type Repository struct {
 	db *sqlx.DB
 }
 
-func NewStore(db *sqlx.DB) *Store {
-	return &Store{
+func NewRepository(db *sqlx.DB) *Repository {
+	return &Repository{
 		db,
 	}
 }
 
-func (ps *Store) GetProjectOverview(ctx context.Context, user *model.User, uuid string) (*model.Project, error) {
+func (r *Repository) GetProjectOverview(ctx context.Context, uuid string) (*model.Project, error) {
 	proj := new(model.Project)
-	if err := ps.db.GetContext(ctx, proj, `
+	if err := r.db.GetContext(ctx, proj, `
 	SELECT uuid, title, description, archived, created_at, visited_at 
-	FROM project WHERE uuid = $1 AND user_id = $2
-	`, uuid, user.ID); err != nil {
+	FROM project WHERE uuid = $1
+	`, uuid); err != nil {
 		return nil, err
 	}
 	return proj, nil
 }
 
-func (ps *Store) GetProjectDetail(ctx context.Context, user *model.User, uuid string) (*model.Project, error) {
+func (r *Repository) GetProjectDetail(ctx context.Context, uuid string) (*model.Project, error) {
 	proj, fields := new(model.Project), []model.Field{}
-	if err := ps.db.GetContext(ctx, proj, `SELECT * FROM project WHERE uuid = $1 AND user_id = $2`, uuid, user.ID); err != nil {
+	if err := r.db.GetContext(ctx, proj, `SELECT * FROM project WHERE uuid = $1`, uuid); err != nil {
 		return nil, err
 	}
-	if err := ps.db.SelectContext(ctx, &fields, `SELECT * FROM field WHERE project_id = $1`, proj.ID); err != nil {
+	if err := r.db.SelectContext(ctx, &fields, `SELECT * FROM field WHERE project_id = $1`, proj.ID); err != nil {
 		return nil, err
 	}
 	proj.Fields = fields
 	return proj, nil
 }
 
-func (ps *Store) CreateProject(ctx context.Context, user *model.User, proj *model.Project) (*model.Project, error) {
-	rows, err := ps.db.NamedQueryContext(ctx, `
+func (r *Repository) CreateProject(ctx context.Context, proj *model.Project) (*model.Project, error) {
+	rows, err := r.db.NamedQueryContext(ctx, `
 		INSERT INTO project ( user_id, title, description, document_url) 
 		VALUES (:user_id, :title, :description, :document_url) RETURNING *
 		`, proj)
@@ -69,15 +69,14 @@ func (ps *Store) CreateProject(ctx context.Context, user *model.User, proj *mode
 	return newProj, nil
 }
 
-func (ps *Store) UpdateProject(ctx context.Context, user *model.User, proj *model.Project) error {
+func (r *Repository) UpdateProject(ctx context.Context, proj *model.Project) error {
 	txCtx, txCancel := context.WithCancel(ctx)
 	defer txCancel()
-	tx, err := ps.db.BeginTxx(txCtx, &sql.TxOptions{})
+	tx, err := r.db.BeginTxx(txCtx, &sql.TxOptions{})
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback()
-	proj.UserID = user.ID
 	errChan, waitChan := make(chan error), make(chan struct{})
 
 	wg := sync.WaitGroup{}
@@ -96,7 +95,7 @@ func (ps *Store) UpdateProject(ctx context.Context, user *model.User, proj *mode
 			document_url = COALESCE(:document_url, document_url),
 			archived = COALESCE(:archived, archived),
 			visitedAt = COALESCE(:visited_at, visited_at)
-			WHERE id=:id AND user_id=:user_id
+			WHERE uuid=:uuid
 			`, proj); err != nil {
 				errChan <- errors.Error("Project Update Error").Wrap(err)
 			}
@@ -141,12 +140,11 @@ func (ps *Store) UpdateProject(ctx context.Context, user *model.User, proj *mode
 	}
 }
 
-func (ps *Store) DeleteProject(ctx context.Context, user *model.User, proj *model.Project) error {
-	proj.UserID = user.ID
-	if _, err := ps.db.NamedExecContext(ctx, `
+func (r *Repository) DeleteProject(ctx context.Context, uuid string) error {
+	if _, err := r.db.ExecContext(ctx, `
 	DELETE FROM project
-	WHERE uuid = :uuid AND user_id = :user_id
-	`, proj); err != nil {
+	WHERE uuid = $1 
+	`, uuid); err != nil {
 		return ErrProjectFailedDelete.Wrap(err)
 	}
 	return nil
