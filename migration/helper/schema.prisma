@@ -87,6 +87,16 @@ model project {
   fields       field[]
   submissions  submission[]
   user         usr          @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([uuid])
+}
+
+model endpoint {
+  id Int @id @default(autoincrement())
+  route String @unique @default(uuid())
+  token String
+
+  @@index([route])
 }
 
 model field {
@@ -101,6 +111,8 @@ model field {
   type       project_type
   fields     submitted_field[]
   project    project           @relation(fields: [project_id], references: [id], onDelete: Cascade)
+
+  @@index([uuid])
 }
 
 model submission {

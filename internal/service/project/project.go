@@ -6,7 +6,7 @@ import (
 	"github.com/arthurlee945/Docrilla/internal/model"
 )
 
-type Store interface {
+type Repository interface {
 	GetProjectOverview(ctx context.Context, user *model.User, uuid string) (*model.Project, error)
 	GetProjectDetail(ctx context.Context, user *model.User, uuid string) (*model.Project, error)
 	CreateProject(ctx context.Context, user *model.User, proj *model.Project) (string, error)
@@ -14,11 +14,11 @@ type Store interface {
 }
 
 type Project struct {
-	store Store
+	repository Repository
 }
 
-func New(s Store) *Project {
+func New(r Repository) *Project {
 	return &Project{
-		store: s,
+		repository: r,
 	}
 }
