@@ -1,57 +1,63 @@
 package mock
 
 import (
-	"database/sql"
-
 	"github.com/arthurlee945/Docrilla/internal/model"
 	"github.com/arthurlee945/Docrilla/internal/model/enum/field"
 	"github.com/arthurlee945/Docrilla/internal/model/enum/user"
-	"github.com/arthurlee945/Docrilla/internal/model/null"
+	"github.com/arthurlee945/Docrilla/internal/util"
 )
 
 var (
 	User = model.User{
-		ID:       1,
-		Name:     "admin",
-		Email:    "admin@admin.com",
-		Password: null.String{NullString: sql.NullString{String: "qwer1234"}},
-		Role:     user.MOCK,
+		ID:       util.ToPointer[uint64](1),
+		Name:     util.ToPointer("admin"),
+		Email:    util.ToPointer("admin@admin.com"),
+		Password: util.ToPointer("qwer1234"),
+		Role:     util.ToPointer(user.MOCK),
 	}
 
 	Account = model.Account{
 		UserID:  User.ID,
-		Type:    "SEED",
-		Provide: "SEED",
+		Type:    util.ToPointer("SEED"),
+		Provide: util.ToPointer("SEED"),
 	}
 
 	Project = model.Project{
-		ID:          1,
-		UUID:        "6be6167d-d25d-4ca4-9b6d-bfdc4e150f3d",
+		ID:          util.ToPointer[uint64](1),
+		UUID:        util.ToPointer("6be6167d-d25d-4ca4-9b6d-bfdc4e150f3d"),
 		UserID:      User.ID,
-		Title:       "TEST TITLE",
-		Description: null.String{NullString: sql.NullString{String: "TEST DESCRIPTION"}},
-		DocumentUrl: "NO URL",
+		Title:       util.ToPointer("TEST TITLE"),
+		Description: util.ToPointer("TEST DESCRIPTION"),
+		DocumentUrl: util.ToPointer("NO URL"),
+	}
+
+	Endpoint = model.Endpoint{
+		ID:    util.ToPointer[uint64](1),
+		Route: util.ToPointer("TEST ROUTE"),
+		Token: util.ToPointer("TEST TOKEN"),
 	}
 
 	Field1 = model.Field{
-		UUID:      "4f836019-e3d0-4ddf-8d4d-93d41eb2c01b",
+		ID:        util.ToPointer[uint64](1),
+		UUID:      util.ToPointer("4f836019-e3d0-4ddf-8d4d-93d41eb2c01b"),
 		ProjectID: Project.ID,
-		X1:        0,
-		Y1:        0,
-		X2:        24,
-		Y2:        24,
-		Page:      1,
-		Type:      field.TEXT,
+		X1:        util.ToPointer[float64](0),
+		Y1:        util.ToPointer[float64](0),
+		X2:        util.ToPointer[float64](24),
+		Y2:        util.ToPointer[float64](24),
+		Page:      util.ToPointer[uint32](1),
+		Type:      util.ToPointer(field.TEXT),
 	}
 
 	Field2 = model.Field{
-		UUID:      "8d566b8a-10be-4610-be14-316d0313fce0",
+		ID:        util.ToPointer[uint64](2),
+		UUID:      util.ToPointer("8d566b8a-10be-4610-be14-316d0313fce0"),
 		ProjectID: Project.ID,
-		X1:        50,
-		Y1:        50,
-		X2:        524,
-		Y2:        124,
-		Page:      1,
-		Type:      field.TEXT,
+		X1:        util.ToPointer[float64](34),
+		Y1:        util.ToPointer[float64](50),
+		X2:        util.ToPointer[float64](524),
+		Y2:        util.ToPointer[float64](124),
+		Page:      util.ToPointer[uint32](1),
+		Type:      util.ToPointer(field.TEXT),
 	}
 )

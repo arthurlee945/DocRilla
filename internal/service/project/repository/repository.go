@@ -79,9 +79,9 @@ func (r *Repository) UpdateProject(ctx context.Context, proj *model.Project) err
 	defer tx.Rollback()
 	errChan, waitChan := make(chan error), make(chan struct{})
 
-	wg := sync.WaitGroup{}
-	wg.Add(len(proj.Fields) + 1)
 	go func() {
+		wg := sync.WaitGroup{}
+		wg.Add(len(proj.Fields) + 1)
 		go func() {
 			defer func() {
 				txCancel()
@@ -94,16 +94,15 @@ func (r *Repository) UpdateProject(ctx context.Context, proj *model.Project) err
 			description = COALESCE(:description, description),
 			document_url = COALESCE(:document_url, document_url),
 			archived = COALESCE(:archived, archived),
-			visitedAt = COALESCE(:visited_at, visited_at)
+			visited_at = COALESCE(:visited_at, visited_at)
 			WHERE uuid=:uuid
 			`, proj); err != nil {
 				errChan <- errors.Error("Project Update Error").Wrap(err)
 			}
 		}()
 
-		for _, f := range proj.Fields {
-			field := f
-			go func() {
+		for _, field := range proj.Fields {
+			go func(field *model.Field) {
 				defer func() {
 					txCancel()
 					wg.Done()
@@ -116,13 +115,13 @@ func (r *Repository) UpdateProject(ctx context.Context, proj *model.Project) err
 				x2 = COALESCE(:x2, x2),
 				y2 = COALESCE(:y2, y2),
 				page = COALESCE(:page, page),
-				type = COALESCE(:type, type)
-				WHERE uuid=:uuid AND project_id=:project_id
+				type = COALESCE(:type, type),
+				WHERE uuid=:uuid
 				`,
 					field); err != nil {
 					errChan <- errors.Error("Field Update Error").Wrap(err)
 				}
-			}()
+			}(&field)
 		}
 
 		wg.Wait()

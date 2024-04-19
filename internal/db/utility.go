@@ -60,6 +60,11 @@ func Seed(db *sqlx.DB) error {
 	}
 	pRows.Close()
 
+	// Endpoint Gen
+	if _, err := db.NamedExec(`INSERT INTO endpoint (id, route, token) VALUES (:id, :route, :token)`, mock.Endpoint); err != nil {
+		return ErrFailedToSeedDB.Wrap(err)
+	}
+
 	// Field Gen
 	for _, field := range []*model.Field{&mock.Field1, &mock.Field2} {
 		if _, err := db.NamedExec(`

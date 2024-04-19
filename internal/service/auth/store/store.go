@@ -5,6 +5,7 @@ import (
 	"database/sql"
 
 	"github.com/arthurlee945/Docrilla/internal/model"
+	"github.com/arthurlee945/Docrilla/internal/util"
 )
 
 type UserStore struct {
@@ -32,5 +33,5 @@ func (ur *UserStore) Get(ctx context.Context, userId string) (*model.User, error
 		return nil, err
 	}
 
-	return &model.User{ID: 0, Name: name}, nil
+	return &model.User{Name: util.ToPointer(name)}, nil
 }
