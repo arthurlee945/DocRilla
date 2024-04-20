@@ -83,10 +83,7 @@ func (r *Repository) UpdateProject(ctx context.Context, proj *model.Project) err
 		wg := sync.WaitGroup{}
 		wg.Add(len(proj.Fields) + 1)
 		go func() {
-			defer func() {
-				txCancel()
-				wg.Done()
-			}()
+			defer wg.Done()
 			if _, err := tx.NamedExecContext(txCtx,
 				`UPDATE project
 			SET
@@ -98,15 +95,13 @@ func (r *Repository) UpdateProject(ctx context.Context, proj *model.Project) err
 			WHERE uuid=:uuid
 			`, proj); err != nil {
 				errChan <- errors.Error("Project Update Error").Wrap(err)
+				txCancel()
 			}
 		}()
 
 		for _, field := range proj.Fields {
 			go func(field *model.Field) {
-				defer func() {
-					txCancel()
-					wg.Done()
-				}()
+				defer wg.Done()
 				if _, err := tx.NamedExecContext(txCtx,
 					`UPDATE field
 				SET
@@ -115,11 +110,12 @@ func (r *Repository) UpdateProject(ctx context.Context, proj *model.Project) err
 				x2 = COALESCE(:x2, x2),
 				y2 = COALESCE(:y2, y2),
 				page = COALESCE(:page, page),
-				type = COALESCE(:type, type),
+				type = COALESCE(:type, type)
 				WHERE uuid=:uuid
 				`,
 					field); err != nil {
 					errChan <- errors.Error("Field Update Error").Wrap(err)
+					txCancel()
 				}
 			}(&field)
 		}

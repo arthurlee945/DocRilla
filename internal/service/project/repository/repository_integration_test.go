@@ -99,21 +99,22 @@ func TestCreateUpdateDeleteProject(t *testing.T) {
 	newProj.DocumentUrl = util.ToPointer(newDocURL)
 	newProj.VisitedAt = util.ToPointer(time.Now())
 
-	// if err := repo.UpdateProject(ctx, newProj); err != nil {
-	// 	t.Errorf("Expected UpdateProject to not throw but got err = %+v", err)
-	// }
+	if err := repo.UpdateProject(ctx, newProj); err != nil {
+		t.Errorf("Expected UpdateProject to not throw but got err = %+v", err)
+	}
 
-	// if _, err := repo.GetProjectDetail(ctx, *newProj.UUID); err != nil {
-	// 	t.Errorf("Expected GetProjectDetail after update project to not throw but got err = %+v", err)
-	// }
-	// if updatedProj.Title != newTitle || updatedProj.Description.String != newDesc || updatedProj.DocumentUrl != newDocURL {
-	// 	t.Errorf("Expected Updated Project to contain correct values but got = %+v", newProj)
-	// }
+	updatedProj, err := repo.GetProjectDetail(ctx, *newProj.UUID)
+	if err != nil {
+		t.Errorf("Expected GetProjectDetail after update project to not throw but got err = %+v", err)
+	}
+	if *updatedProj.Title != newTitle || *updatedProj.Description != newDesc || *updatedProj.DocumentUrl != newDocURL {
+		t.Errorf("Expected Updated Project to contain correct values but got = %+v", newProj)
+	}
 
-	// // DELETE
-	// if err := repo.DeleteProject(ctx, updatedProj.UUID); err != nil {
-	// 	t.Errorf("Expected DeleteProject to not throw but got err = %+v", err)
-	// }
+	// DELETE
+	if err := repo.DeleteProject(ctx, *updatedProj.UUID); err != nil {
+		t.Errorf("Expected DeleteProject to not throw but got err = %+v", err)
+	}
 }
 
 func repoPrep(t *testing.T) (*sqlx.DB, *repo.Repository) {
