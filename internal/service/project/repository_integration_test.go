@@ -16,14 +16,21 @@ import (
 
 const DSN = "postgresql://public_user:Qwer1234@localhost:5432/docrilla?sslmode=disable"
 
-func TestGetOverviewById(t *testing.T) {
-	testProj := &model.Project{
-		UUID:        mock.Project.UUID,
-		Title:       mock.Project.Title,
-		Description: mock.Project.Description,
-		CreatedAt:   mock.Project.CreatedAt,
-		VisitedAt:   mock.Project.VisitedAt,
+func TestGetAll(t *testing.T) {
+	dbConn, repo := repoPrep(t)
+	defer dbConn.Close()
+
+	ctx := context.Background()
+	projs, err := repo.GetAll(ctx)
+	if err != nil {
+		t.Errorf("Expected GetAll to return Error, but got err = %+v; projs = %+v", err, projs)
 	}
+	if len(projs) != 1 {
+		t.Errorf("Expected existing project length to be 1 but got = %d", len(projs))
+	}
+}
+
+func TestGetOverviewById(t *testing.T) {
 	dbConn, repo := repoPrep(t)
 	defer dbConn.Close()
 
@@ -39,8 +46,8 @@ func TestGetOverviewById(t *testing.T) {
 	if *proj.UUID == "" || *proj.Title == "" || *proj.Archived != false || proj.CreatedAt.IsZero() {
 		t.Errorf("Expected GetOverviewById to return all values specified, but got = %+v", proj)
 	}
-	if reflect.DeepEqual(proj, testProj) {
-		t.Errorf("Expected GetOverviewById project to equal to test project expected = %+v, got = %+v", testProj, proj)
+	if reflect.DeepEqual(proj, &mock.Project) {
+		t.Errorf("Expected GetOverviewById project to equal to test project expected = %+v, got = %+v", mock.Project, proj)
 	}
 }
 

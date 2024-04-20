@@ -11,7 +11,7 @@ import (
 )
 
 type Repository interface {
-	GetAll(ctx context.Context) (*[]model.Project, error)
+	GetAll(ctx context.Context) ([]model.Project, error)
 	GetOverviewById(ctx context.Context, uuid string) (*model.Project, error)
 	GetDetailById(ctx context.Context, uuid string) (*model.Project, error)
 	Create(ctx context.Context, proj *model.Project) (*model.Project, error)
@@ -29,8 +29,8 @@ func NewRepository(db *sqlx.DB) Repository {
 	}
 }
 
-func (r *repository) GetAll(ctx context.Context) (*[]model.Project, error) {
-	projects := &[]model.Project{}
+func (r *repository) GetAll(ctx context.Context) ([]model.Project, error) {
+	projects := []model.Project{}
 	if err := r.db.SelectContext(ctx, &projects, "SELECT uuid, title, description, archived, created_at, visited_at FROM project LIMIT 10"); err != nil {
 		return nil, ErrRepoGet.Wrap(err)
 	}
@@ -66,7 +66,7 @@ func (r *repository) Create(ctx context.Context, proj *model.Project) (*model.Pr
 		VALUES (:user_id, :title, :description, :document_url) RETURNING *
 		`, proj)
 	if err != nil {
-		return nil, err
+		return nil, ErrRepoCreate.Wrap(err)
 	}
 	defer rows.Close()
 	if !rows.Next() {

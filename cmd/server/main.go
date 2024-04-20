@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/arthurlee945/Docrilla/internal/config"
@@ -22,13 +23,13 @@ func main() {
 	}
 	defer dbConn.Close()
 
-	// if err := db.DropAllTable(dbConn); err != nil {
-	// 	fmt.Println(err)
-	// }
-	// if err := db.InitializeTable(dbConn); err != nil {
-	// 	fmt.Println(err)
-	// }
-	// if err := db.Seed(dbConn); err != nil {
-	// 	fmt.Println(err)
-	// }
+	if err := db.DropAllTable(dbConn); err != nil {
+		fmt.Println(err)
+	}
+	if err := db.InitializeTable(dbConn); err != nil {
+		fmt.Println(err)
+	}
+	if err := db.Seed(dbConn); err != nil {
+		fmt.Println(err)
+	}
 }

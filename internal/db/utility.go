@@ -61,7 +61,7 @@ func Seed(db *sqlx.DB) error {
 	pRows.Close()
 
 	// Endpoint Gen
-	if _, err := db.NamedExec(`INSERT INTO endpoint (id, route, token) VALUES (:id, :route, :token)`, mock.Endpoint); err != nil {
+	if _, err := db.NamedExec(`INSERT INTO endpoint (id, project_id, route, token) VALUES (:id, :project_id, :route, :token)`, mock.Endpoint); err != nil {
 		return ErrFailedToSeedDB.Wrap(err)
 	}
 
@@ -79,7 +79,7 @@ func Seed(db *sqlx.DB) error {
 
 func DropAllTable(db *sqlx.DB) error {
 	if _, err := db.Exec(`
-DROP Table IF EXISTS account, field, project, session, usr, verification_token, submission, submitted_field;
+DROP Table IF EXISTS account, field, project, endpoint, session, usr, verification_token, submission, submitted_field;
 DROP Type IF EXISTS user_role, role, project_type, type;
 	`); err != nil {
 		return err

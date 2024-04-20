@@ -32,9 +32,10 @@ var (
 	}
 
 	Endpoint = model.Endpoint{
-		ID:    util.ToPointer[uint64](1),
-		Route: util.ToPointer("TEST ROUTE"),
-		Token: util.ToPointer("TEST TOKEN"),
+		ID:        util.ToPointer[uint64](1),
+		Route:     util.ToPointer("TEST ROUTE"),
+		Token:     util.ToPointer("TEST TOKEN"),
+		ProjectId: util.ToPointer[uint64](1),
 	}
 
 	Field1 = model.Field{
