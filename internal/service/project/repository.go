@@ -1,4 +1,4 @@
-package repository
+package project
 
 import (
 	"context"
@@ -10,47 +10,57 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-const (
-	ErrProjectFailedGet    = errors.Error("project_failed_get: couldn't find the project.")
-	ErrProjectFailedCreate = errors.Error("project_failed_create: project couldn't be created.")
-	ErrProjectFailedUpdate = errors.Error("project_failed_update: project couldn't update.")
-	ErrProjectFailedDelete = errors.Error("project_failed_delete: project couldn't delete.")
-)
+type Repository interface {
+	GetAll(ctx context.Context) (*[]model.Project, error)
+	GetOverviewById(ctx context.Context, uuid string) (*model.Project, error)
+	GetDetailById(ctx context.Context, uuid string) (*model.Project, error)
+	Create(ctx context.Context, proj *model.Project) (*model.Project, error)
+	Update(ctx context.Context, proj *model.Project) error
+	Delete(ctx context.Context, uuid string) error
+}
 
-type Repository struct {
+type repository struct {
 	db *sqlx.DB
 }
 
-func NewRepository(db *sqlx.DB) *Repository {
-	return &Repository{
+func NewRepository(db *sqlx.DB) Repository {
+	return &repository{
 		db,
 	}
 }
 
-func (r *Repository) GetProjectOverview(ctx context.Context, uuid string) (*model.Project, error) {
+func (r *repository) GetAll(ctx context.Context) (*[]model.Project, error) {
+	projects := &[]model.Project{}
+	if err := r.db.SelectContext(ctx, &projects, "SELECT uuid, title, description, archived, created_at, visited_at FROM project LIMIT 10"); err != nil {
+		return nil, ErrRepoGet.Wrap(err)
+	}
+	return projects, nil
+}
+
+func (r *repository) GetOverviewById(ctx context.Context, uuid string) (*model.Project, error) {
 	proj := new(model.Project)
 	if err := r.db.GetContext(ctx, proj, `
 	SELECT uuid, title, description, archived, created_at, visited_at 
 	FROM project WHERE uuid = $1
 	`, uuid); err != nil {
-		return nil, err
+		return nil, ErrRepoGet.Wrap(err)
 	}
 	return proj, nil
 }
 
-func (r *Repository) GetProjectDetail(ctx context.Context, uuid string) (*model.Project, error) {
+func (r *repository) GetDetailById(ctx context.Context, uuid string) (*model.Project, error) {
 	proj, fields := new(model.Project), []model.Field{}
 	if err := r.db.GetContext(ctx, proj, `SELECT * FROM project WHERE uuid = $1`, uuid); err != nil {
-		return nil, err
+		return nil, ErrRepoGet.Wrap(err)
 	}
 	if err := r.db.SelectContext(ctx, &fields, `SELECT * FROM field WHERE project_id = $1`, proj.ID); err != nil {
-		return nil, err
+		return nil, ErrRepoGet.Wrap(err)
 	}
 	proj.Fields = fields
 	return proj, nil
 }
 
-func (r *Repository) CreateProject(ctx context.Context, proj *model.Project) (*model.Project, error) {
+func (r *repository) Create(ctx context.Context, proj *model.Project) (*model.Project, error) {
 	rows, err := r.db.NamedQueryContext(ctx, `
 		INSERT INTO project ( user_id, title, description, document_url) 
 		VALUES (:user_id, :title, :description, :document_url) RETURNING *
@@ -60,7 +70,7 @@ func (r *Repository) CreateProject(ctx context.Context, proj *model.Project) (*m
 	}
 	defer rows.Close()
 	if !rows.Next() {
-		return nil, ErrProjectFailedCreate.Wrap(errors.ErrNotFound)
+		return nil, ErrRepoCreate.Wrap(errors.ErrNotFound)
 	}
 	newProj := new(model.Project)
 	if err := rows.StructScan(newProj); err != nil {
@@ -69,7 +79,7 @@ func (r *Repository) CreateProject(ctx context.Context, proj *model.Project) (*m
 	return newProj, nil
 }
 
-func (r *Repository) UpdateProject(ctx context.Context, proj *model.Project) error {
+func (r *repository) Update(ctx context.Context, proj *model.Project) error {
 	txCtx, txCancel := context.WithCancel(ctx)
 	defer txCancel()
 	tx, err := r.db.BeginTxx(txCtx, &sql.TxOptions{})
@@ -126,21 +136,21 @@ func (r *Repository) UpdateProject(ctx context.Context, proj *model.Project) err
 
 	select {
 	case err := <-errChan:
-		return ErrProjectFailedUpdate.Wrap(err)
+		return ErrRepoUpdate.Wrap(err)
 	case <-waitChan:
 		if err := tx.Commit(); err != nil {
-			return ErrProjectFailedUpdate.Wrap(err)
+			return ErrRepoUpdate.Wrap(err)
 		}
 		return nil
 	}
 }
 
-func (r *Repository) DeleteProject(ctx context.Context, uuid string) error {
+func (r *repository) Delete(ctx context.Context, uuid string) error {
 	if _, err := r.db.ExecContext(ctx, `
 	DELETE FROM project
 	WHERE uuid = $1 
 	`, uuid); err != nil {
-		return ErrProjectFailedDelete.Wrap(err)
+		return ErrRepoDelete.Wrap(err)
 	}
 	return nil
 }
