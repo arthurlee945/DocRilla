@@ -50,7 +50,7 @@ func Seed(db *sqlx.DB) error {
 	// Project Gen
 	var projID int
 	pRows, err := db.NamedQuery(`
-	INSERT INTO project (id, user_id, uuid, title, description, document_url) VALUES (:id, :user_id, :uuid, :title, :description, :document_url) RETURNING id
+	INSERT INTO project (id, user_id, uuid, route, token, title, description, document_url) VALUES (:id, :user_id, :uuid, :route, :token, :title, :description, :document_url) RETURNING id
 	`, mock.Project)
 	if err != nil {
 		return ErrFailedToSeedDB.Wrap(err)
@@ -59,11 +59,6 @@ func Seed(db *sqlx.DB) error {
 		pRows.Scan(&projID)
 	}
 	pRows.Close()
-
-	// Endpoint Gen
-	if _, err := db.NamedExec(`INSERT INTO endpoint (id, project_id, route, token) VALUES (:id, :project_id, :route, :token)`, mock.Endpoint); err != nil {
-		return ErrFailedToSeedDB.Wrap(err)
-	}
 
 	// Field Gen
 	for _, field := range []*model.Field{&mock.Field1, &mock.Field2} {

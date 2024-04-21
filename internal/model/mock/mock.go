@@ -26,16 +26,11 @@ var (
 		ID:          util.ToPointer[uint64](1),
 		UUID:        util.ToPointer("6be6167d-d25d-4ca4-9b6d-bfdc4e150f3d"),
 		UserID:      User.ID,
+		Route:       util.ToPointer("TEST ROUTE"),
+		Token:       util.ToPointer("TEST TOKEN"),
 		Title:       util.ToPointer("TEST TITLE"),
 		Description: util.ToPointer("TEST DESCRIPTION"),
 		DocumentUrl: util.ToPointer("NO URL"),
-	}
-
-	Endpoint = model.Endpoint{
-		ID:        util.ToPointer[uint64](1),
-		Route:     util.ToPointer("TEST ROUTE"),
-		Token:     util.ToPointer("TEST TOKEN"),
-		ProjectId: util.ToPointer[uint64](1),
 	}
 
 	Field1 = model.Field{

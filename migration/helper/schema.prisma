@@ -78,6 +78,8 @@ model project {
   id           Int          @id @default(autoincrement())
   user_id      Int
   uuid         String       @unique @default(uuid())
+  route        String       @unique @default(uuid())
+  token        String
   title        String
   description  String?
   document_url String
@@ -85,23 +87,11 @@ model project {
   visited_at   DateTime?
   created_at   DateTime     @default(now())
   updated_at   DateTime     @default(now()) @updatedAt
-  endpoint     endpoint?
   fields       field[]
   submissions  submission[]
   user         usr          @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@index([uuid])
-}
-
-model endpoint {
-  id         Int    @id @default(autoincrement())
-  route      String @unique @default(uuid())
-  token      String
-  project_id Int    @unique
-
-  project project @relation(fields: [project_id], references: [id], onDelete: Cascade)
-
-  @@index([route])
 }
 
 model field {

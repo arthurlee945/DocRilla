@@ -62,7 +62,9 @@ CREATE TABLE "verification_token" (
 CREATE TABLE "project" (
     "id" SERIAL NOT NULL,
     "user_id" INTEGER NOT NULL,
-    "uuid" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "uuid" TEXT NOT NULL DEFAULT gen_random_uuid(),
+    "route" TEXT NOT NULL DEFAULT gen_random_uuid(),
+    "token" TEXT,
     "title" TEXT NOT NULL,
     "description" TEXT,
     "document_url" TEXT NOT NULL,
@@ -75,19 +77,9 @@ CREATE TABLE "project" (
 );
 
 -- CreateTable
-CREATE TABLE "endpoint" (
-    "id" SERIAL NOT NULL,
-    "route" TEXT NOT NULL DEFAULT gen_random_uuid(),
-    "token" TEXT NOT NULL,
-    "project_id" INTEGER NOT NULL,
-
-    CONSTRAINT "endpoint_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "field" (
     "id" SERIAL NOT NULL,
-    "uuid" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "uuid" TEXT NOT NULL DEFAULT gen_random_uuid(),
     "project_id" INTEGER NOT NULL,
     "x1" DOUBLE PRECISION NOT NULL,
     "y1" DOUBLE PRECISION NOT NULL,
@@ -137,16 +129,10 @@ CREATE UNIQUE INDEX "verification_token_identifier_token_key" ON "verification_t
 CREATE UNIQUE INDEX "project_uuid_key" ON "project"("uuid");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "project_route_key" ON "project"("route");
+
+-- CreateIndex
 CREATE INDEX "project_uuid_idx" ON "project"("uuid");
-
--- CreateIndex
-CREATE UNIQUE INDEX "endpoint_route_key" ON "endpoint"("route");
-
--- CreateIndex
-CREATE UNIQUE INDEX "endpoint_project_id_key" ON "endpoint"("project_id");
-
--- CreateIndex
-CREATE INDEX "endpoint_route_idx" ON "endpoint"("route");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "field_uuid_key" ON "field"("uuid");
@@ -162,9 +148,6 @@ ALTER TABLE "session" ADD CONSTRAINT "session_user_id_fkey" FOREIGN KEY ("user_i
 
 -- AddForeignKey
 ALTER TABLE "project" ADD CONSTRAINT "project_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "usr"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "endpoint" ADD CONSTRAINT "endpoint_project_id_fkey" FOREIGN KEY ("project_id") REFERENCES "project"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "field" ADD CONSTRAINT "field_project_id_fkey" FOREIGN KEY ("project_id") REFERENCES "project"("id") ON DELETE CASCADE ON UPDATE CASCADE;

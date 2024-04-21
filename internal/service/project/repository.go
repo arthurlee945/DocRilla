@@ -31,7 +31,7 @@ func NewRepository(db *sqlx.DB) Repository {
 
 func (r *repository) GetAll(ctx context.Context) ([]model.Project, error) {
 	projects := []model.Project{}
-	if err := r.db.SelectContext(ctx, &projects, "SELECT uuid, title, description, archived, created_at, visited_at FROM project LIMIT 10"); err != nil {
+	if err := r.db.SelectContext(ctx, &projects, "SELECT uuid, title, description, archived, token, route, created_at, visited_at FROM project LIMIT 10"); err != nil {
 		return nil, ErrRepoGet.Wrap(err)
 	}
 	return projects, nil
@@ -40,7 +40,7 @@ func (r *repository) GetAll(ctx context.Context) ([]model.Project, error) {
 func (r *repository) GetOverviewById(ctx context.Context, uuid string) (*model.Project, error) {
 	proj := new(model.Project)
 	if err := r.db.GetContext(ctx, proj, `
-	SELECT uuid, title, description, archived, created_at, visited_at 
+	SELECT uuid, title, description, archived, token, route, created_at, visited_at 
 	FROM project WHERE uuid = $1
 	`, uuid); err != nil {
 		return nil, ErrRepoGet.Wrap(err)
@@ -62,8 +62,8 @@ func (r *repository) GetDetailById(ctx context.Context, uuid string) (*model.Pro
 
 func (r *repository) Create(ctx context.Context, proj *model.Project) (*model.Project, error) {
 	rows, err := r.db.NamedQueryContext(ctx, `
-		INSERT INTO project ( user_id, title, description, document_url) 
-		VALUES (:user_id, :title, :description, :document_url) RETURNING *
+		INSERT INTO project ( user_id, title, description, document_url, token, route) 
+		VALUES (:user_id, :title, :description, :document_url, :token, :route) RETURNING *
 		`, proj)
 	if err != nil {
 		return nil, ErrRepoCreate.Wrap(err)
@@ -100,6 +100,8 @@ func (r *repository) Update(ctx context.Context, proj *model.Project) error {
 			title = COALESCE(:title, title),
 			description = COALESCE(:description, description),
 			document_url = COALESCE(:document_url, document_url),
+			route = COALESCE(:route, route),
+			token = COALESCE(:token, token),
 			archived = COALESCE(:archived, archived),
 			visited_at = COALESCE(:visited_at, visited_at)
 			WHERE uuid=:uuid

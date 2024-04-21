@@ -76,13 +76,14 @@ func TestCreateUpdateDeleteProject(t *testing.T) {
 	defer dbConn.Close()
 	ctx := context.Background()
 
-	title, desc, docURL := "TEST TITLE", "TEST DESCRIPTION", "TEST DOC URL"
+	title, desc, docURL, testRoute := "TEST TITLE", "TEST DESCRIPTION", "TEST DOC URL", "test-route"+time.Now().String()
 
 	mockProj := &model.Project{
 		UserID:      mock.User.ID,
 		Title:       util.ToPointer(title),
 		Description: util.ToPointer(desc),
 		DocumentUrl: util.ToPointer(docURL),
+		Route:       util.ToPointer(testRoute),
 	}
 
 	//CREATE
@@ -90,7 +91,7 @@ func TestCreateUpdateDeleteProject(t *testing.T) {
 	if err != nil {
 		t.Errorf("Expected Create to return Project, but got err = %+v", err)
 	}
-	if *newProj.Title != title || *newProj.Description != desc || *newProj.DocumentUrl != docURL {
+	if *newProj.Title != title || *newProj.Description != desc || *newProj.DocumentUrl != docURL || *newProj.Route != testRoute {
 		t.Errorf("Expected Created New Project to contain correct values but got = %+v", newProj)
 	}
 
