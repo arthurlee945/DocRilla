@@ -23,7 +23,7 @@ func NewService(r Repository) Service {
 	}
 }
 
-func (s *service) GetAll(ctx context.Context, opts struct{ limit string }) (*Project, error) {
+func (s *service) GetAll(ctx context.Context, opts GetAllOpts) (*Project, error) {
 	return nil, nil
 }
 

@@ -21,7 +21,7 @@ func TestGetAll(t *testing.T) {
 	defer dbConn.Close()
 
 	ctx := context.Background()
-	projs, err := repo.GetAll(ctx)
+	projs, err := repo.GetAll(ctx, project.GetAllOpts{Limit: 10, Order: project.ASC})
 	if err != nil {
 		t.Errorf("Expected GetAll to return Error, but got err = %+v; projs = %+v", err, projs)
 	}

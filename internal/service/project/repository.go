@@ -10,8 +10,20 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+type Order string
+
+const (
+	DESC Order = "DESC"
+	ASC  Order = "ASC"
+)
+
+type GetAllOpts struct {
+	Limit uint8
+	Order Order
+}
+
 type Repository interface {
-	GetAll(ctx context.Context) ([]model.Project, error)
+	GetAll(ctx context.Context, opts GetAllOpts) ([]model.Project, error)
 	GetOverviewById(ctx context.Context, uuid string) (*model.Project, error)
 	GetDetailById(ctx context.Context, uuid string) (*model.Project, error)
 	Create(ctx context.Context, proj *model.Project) (*model.Project, error)
@@ -29,9 +41,9 @@ func NewRepository(db *sqlx.DB) Repository {
 	}
 }
 
-func (r *repository) GetAll(ctx context.Context) ([]model.Project, error) {
+func (r *repository) GetAll(ctx context.Context, opts GetAllOpts) ([]model.Project, error) {
 	projects := []model.Project{}
-	if err := r.db.SelectContext(ctx, &projects, "SELECT uuid, title, description, archived, token, route, created_at, visited_at FROM project LIMIT 10"); err != nil {
+	if err := r.db.SelectContext(ctx, &projects, `SELECT uuid, title, description, archived, token, route, created_at, visited_at FROM project ORDER BY $1 LIMIT $2`, opts.Order, opts.Limit); err != nil {
 		return nil, ErrRepoGet.Wrap(err)
 	}
 	return projects, nil
