@@ -52,10 +52,12 @@ func loadEnvironment(ctx context.Context, cfg interface{}) error {
 
 	data, err := os.ReadFile(path)
 	if err != nil {
+		logger.From(ctx).Error("Failed Getting Env File", zap.Error(err))
 		return ErrRead.Wrap(err)
 	}
 
 	if err := yaml.Unmarshal(data, cfg); err != nil {
+		logger.From(ctx).Error("Failed Unmarshalling Env File", zap.Error(err))
 		return ErrUnmarshal.Wrap(err)
 	}
 

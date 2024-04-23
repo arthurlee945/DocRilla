@@ -7,23 +7,12 @@ import (
 
 	"github.com/arthurlee945/Docrilla/internal/errors"
 	"github.com/arthurlee945/Docrilla/internal/model"
+
 	"github.com/jmoiron/sqlx"
 )
 
-type Order string
-
-const (
-	DESC Order = "DESC"
-	ASC  Order = "ASC"
-)
-
-type GetAllOpts struct {
-	Limit uint8
-	Order Order
-}
-
 type Repository interface {
-	GetAll(ctx context.Context, opts GetAllOpts) ([]model.Project, error)
+	GetAll(ctx context.Context, cursor string, limit uint8) (res []model.Project, nextCursor string, err error)
 	GetOverviewById(ctx context.Context, uuid string) (*model.Project, error)
 	GetDetailById(ctx context.Context, uuid string) (*model.Project, error)
 	Create(ctx context.Context, proj *model.Project) (*model.Project, error)
@@ -41,12 +30,31 @@ func NewRepository(db *sqlx.DB) Repository {
 	}
 }
 
-func (r *repository) GetAll(ctx context.Context, opts GetAllOpts) ([]model.Project, error) {
-	projects := []model.Project{}
-	if err := r.db.SelectContext(ctx, &projects, `SELECT uuid, title, description, archived, token, route, created_at, visited_at FROM project ORDER BY $1 LIMIT $2`, opts.Order, opts.Limit); err != nil {
-		return nil, ErrRepoGet.Wrap(err)
+type Order string
+
+const (
+	DESC Order = "DESC"
+	ASC  Order = "ASC"
+)
+
+func (r *repository) GetAll(ctx context.Context, cursor string, limit uint8) ([]model.Project, string, error) {
+	decodedCursor, err := DecodeCursor(cursor)
+	if err != nil && cursor != "" {
+		return nil, "", ErrRepoGet.Wrap(err)
 	}
-	return projects, nil
+	projects := []model.Project{}
+	if err := r.db.SelectContext(ctx, &projects, `
+	SELECT uuid, title, description, archived, token, route, created_at, visited_at 
+	FROM project 
+	WHERE created_at > $1 ORDER BY created_at LIMIT $2`,
+		decodedCursor, limit); err != nil {
+		return nil, "", ErrRepoGet.Wrap(err)
+	}
+	var nextCursor string
+	if len(projects) == int(limit) {
+		nextCursor = EncodeCursor(*projects[len(projects)-1].CreatedAt)
+	}
+	return projects, nextCursor, nil
 }
 
 func (r *repository) GetOverviewById(ctx context.Context, uuid string) (*model.Project, error) {

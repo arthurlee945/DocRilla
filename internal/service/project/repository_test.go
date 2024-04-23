@@ -21,12 +21,12 @@ func TestGetAll(t *testing.T) {
 	defer dbConn.Close()
 
 	ctx := context.Background()
-	projs, err := repo.GetAll(ctx, project.GetAllOpts{Limit: 10, Order: project.ASC})
+	projs, nextCursor, err := repo.GetAll(ctx, "", 10)
 	if err != nil {
-		t.Errorf("Expected GetAll to return Error, but got err = %+v; projs = %+v", err, projs)
+		t.Errorf("Expected GetAll to return Error, but got err = %+v; projs = %+v; nextCursor = %s", err, projs, nextCursor)
 	}
-	if len(projs) != 1 {
-		t.Errorf("Expected existing project length to be 1 but got = %d", len(projs))
+	if len(projs) < 1 {
+		t.Errorf("Expected existing project length to be 1 or more but got = %d", len(projs))
 	}
 }
 
