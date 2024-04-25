@@ -96,25 +96,16 @@ func TestCreateUpdateDeleteProject(t *testing.T) {
 	}
 
 	// UPDATE
-	field1, field2 := mock.Field1, mock.Field2
-	field1.ID, field2.ID = nil, nil
-	field1.ProjectID, field2.ProjectID = newProj.ID, newProj.ID
-
 	newTitle, newDesc, newDocURL := "NEW TEST TITLE", "NEW TEST DESCRIPTION", "NEW TEST DOC URL"
-	newProj.Fields = []model.Field{field1, field2}
 	newProj.Title = util.ToPointer(newTitle)
 	newProj.Description = util.ToPointer(newDesc)
 	newProj.DocumentUrl = util.ToPointer(newDocURL)
 	newProj.VisitedAt = util.ToPointer(time.Now())
-
-	if err := repo.Update(ctx, newProj); err != nil {
+	updatedProj, err := repo.Update(ctx, newProj)
+	if err != nil {
 		t.Errorf("Expected Update to not throw but got err = %+v", err)
 	}
 
-	updatedProj, err := repo.GetDetailById(ctx, *newProj.UUID)
-	if err != nil {
-		t.Errorf("Expected GetDetailById after update project to not throw but got err = %+v", err)
-	}
 	if *updatedProj.Title != newTitle || *updatedProj.Description != newDesc || *updatedProj.DocumentUrl != newDocURL {
 		t.Errorf("Expected Updated Project to contain correct values but got = %+v", newProj)
 	}

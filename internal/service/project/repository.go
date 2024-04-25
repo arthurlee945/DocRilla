@@ -2,8 +2,6 @@ package project
 
 import (
 	"context"
-	"database/sql"
-	"sync"
 
 	"github.com/arthurlee945/Docrilla/internal/errors"
 	"github.com/arthurlee945/Docrilla/internal/model"
@@ -16,7 +14,7 @@ type Repository interface {
 	GetOverviewById(ctx context.Context, uuid string) (*model.Project, error)
 	GetDetailById(ctx context.Context, uuid string) (*model.Project, error)
 	Create(ctx context.Context, proj *model.Project) (*model.Project, error)
-	Update(ctx context.Context, proj *model.Project) error
+	Update(ctx context.Context, proj *model.Project) (*model.Project, error)
 	Delete(ctx context.Context, uuid string) error
 }
 
@@ -99,6 +97,43 @@ func (r *repository) Create(ctx context.Context, proj *model.Project) (*model.Pr
 	return newProj, nil
 }
 
+func (r *repository) Update(ctx context.Context, proj *model.Project) (*model.Project, error) {
+	rows, err := r.db.NamedQueryContext(ctx,
+		`UPDATE project
+	SET
+	title = COALESCE(:title, title),
+	description = COALESCE(:description, description),
+	document_url = COALESCE(:document_url, document_url),
+	route = COALESCE(:route, route),
+	token = COALESCE(:token, token),
+	archived = COALESCE(:archived, archived),
+	visited_at = COALESCE(:visited_at, visited_at)
+	WHERE uuid=:uuid RETURNING *
+	`, proj)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	updatedProj := &model.Project{}
+	for rows.Next() {
+		if err := rows.StructScan(updatedProj); err != nil {
+			return nil, err
+		}
+	}
+	return updatedProj, nil
+}
+
+func (r *repository) Delete(ctx context.Context, uuid string) error {
+	if _, err := r.db.ExecContext(ctx, `
+	DELETE FROM project
+	WHERE uuid = $1 
+	`, uuid); err != nil {
+		return ErrRepoDelete.Wrap(err)
+	}
+	return nil
+}
+
+/*
 func (r *repository) Update(ctx context.Context, proj *model.Project) error {
 	txCtx, txCancel := context.WithCancel(ctx)
 	defer txCancel()
@@ -155,7 +190,6 @@ func (r *repository) Update(ctx context.Context, proj *model.Project) error {
 		wg.Wait()
 		close(waitChan)
 	}()
-
 	select {
 	case err := <-errChan:
 		return ErrRepoUpdate.Wrap(err)
@@ -166,13 +200,4 @@ func (r *repository) Update(ctx context.Context, proj *model.Project) error {
 		return nil
 	}
 }
-
-func (r *repository) Delete(ctx context.Context, uuid string) error {
-	if _, err := r.db.ExecContext(ctx, `
-	DELETE FROM project
-	WHERE uuid = $1 
-	`, uuid); err != nil {
-		return ErrRepoDelete.Wrap(err)
-	}
-	return nil
-}
+*/
