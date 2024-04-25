@@ -3,9 +3,14 @@ package project
 import (
 	"context"
 
+	"github.com/go-playground/validator/v10"
+	UUID "github.com/google/uuid"
+
 	"github.com/arthurlee945/Docrilla/internal/model"
 	"github.com/arthurlee945/Docrilla/internal/util"
 )
+
+var validate = validator.New(validator.WithRequiredStructEnabled())
 
 type Service interface {
 	GetAll(context.Context, GetAllRequest) ([]model.Project, string, error)
@@ -39,6 +44,9 @@ func (s *service) GetAll(ctx context.Context, req GetAllRequest) ([]model.Projec
 }
 
 func (s *service) GetOverviewById(ctx context.Context, uuid string) (*model.Project, error) {
+	if err := UUID.Validate(uuid); err != nil {
+		return nil, ErrInvalidUUID.Wrap(err)
+	}
 	project, err := s.repo.GetOverviewById(ctx, uuid)
 	if err != nil {
 		return nil, ErrRepoGet.Wrap(err)
@@ -47,6 +55,9 @@ func (s *service) GetOverviewById(ctx context.Context, uuid string) (*model.Proj
 }
 
 func (s *service) GetDetailById(ctx context.Context, uuid string) (*model.Project, error) {
+	if err := UUID.Validate(uuid); err != nil {
+		return nil, ErrInvalidUUID.Wrap(err)
+	}
 	project, err := s.repo.GetDetailById(ctx, uuid)
 	if err != nil {
 		return nil, ErrRepoGet.Wrap(err)
@@ -64,6 +75,9 @@ type CreateRequest struct {
 }
 
 func (s *service) Create(ctx context.Context, req CreateRequest) (*model.Project, error) {
+	if err := validate.Struct(req); err != nil {
+		return nil, ErrInvalidReqObj.Wrap(err)
+	}
 	newProj := &model.Project{
 		UserID:      util.ToPointer(req.UserID),
 		Title:       util.ToPointer(req.Title),
@@ -78,6 +92,15 @@ func (s *service) Create(ctx context.Context, req CreateRequest) (*model.Project
 	}
 	return createdProj, nil
 }
+
+// maybe need to seperate field update
+type UpdateRequest struct {
+	UUID         string `validate:"required"`
+	Title        *string
+	Description  *string
+	Document_url *string
+}
+
 func (s *service) Update(ctx context.Context, uuid string) error {
 	return nil
 }
