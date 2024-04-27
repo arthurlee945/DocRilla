@@ -13,7 +13,7 @@ import (
 var validate = validator.New(validator.WithRequiredStructEnabled())
 
 type Service interface {
-	GetAll(context.Context, GetAllRequest) ([]model.Project, string, error)
+	GetAll(context.Context, GetAllRequest) (projects []model.Project, nextCursor string, err error)
 }
 
 type Project struct {
@@ -31,12 +31,12 @@ func NewService(r Repository) Service {
 }
 
 type GetAllRequest struct {
-	limit  uint8
-	cursor string
+	Limit  uint8
+	Cursor string
 }
 
 func (s *service) GetAll(ctx context.Context, req GetAllRequest) ([]model.Project, string, error) {
-	projects, nextCursor, err := s.repo.GetAll(ctx, req.cursor, req.limit)
+	projects, nextCursor, err := s.repo.GetAll(ctx, req.Limit, req.Cursor)
 	if err != nil {
 		return nil, "", ErrRepoGet.Wrap(err)
 	}

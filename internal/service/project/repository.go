@@ -10,7 +10,7 @@ import (
 )
 
 type Repository interface {
-	GetAll(ctx context.Context, cursor string, limit uint8) (res []model.Project, nextCursor string, err error)
+	GetAll(ctx context.Context, limit uint8, cursor string) (res []model.Project, nextCursor string, err error)
 	GetOverviewById(ctx context.Context, uuid string) (*model.Project, error)
 	GetDetailById(ctx context.Context, uuid string) (*model.Project, error)
 	Create(ctx context.Context, proj *model.Project) (*model.Project, error)
@@ -35,7 +35,7 @@ const (
 	ASC  Order = "ASC"
 )
 
-func (r *repository) GetAll(ctx context.Context, cursor string, limit uint8) ([]model.Project, string, error) {
+func (r *repository) GetAll(ctx context.Context, limit uint8, cursor string) ([]model.Project, string, error) {
 	decodedCursor, err := DecodeCursor(cursor)
 	if err != nil && cursor != "" {
 		return nil, "", ErrRepoGet.Wrap(err)

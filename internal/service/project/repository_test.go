@@ -14,14 +14,12 @@ import (
 	_ "github.com/lib/pq"
 )
 
-const DSN = "postgresql://public_user:Qwer1234@localhost:5432/docrilla?sslmode=disable"
-
-func TestGetAll(t *testing.T) {
+func TestRepositoryGetAll(t *testing.T) {
 	dbConn, repo := repoPrep(t)
 	defer dbConn.Close()
 
 	ctx := context.Background()
-	projs, nextCursor, err := repo.GetAll(ctx, "", 10)
+	projs, nextCursor, err := repo.GetAll(ctx, 10, "")
 	if err != nil {
 		t.Errorf("Expected GetAll to return Error, but got err = %+v; projs = %+v; nextCursor = %s", err, projs, nextCursor)
 	}
@@ -30,7 +28,7 @@ func TestGetAll(t *testing.T) {
 	}
 }
 
-func TestGetOverviewById(t *testing.T) {
+func TestRepositoryGetOverviewById(t *testing.T) {
 	dbConn, repo := repoPrep(t)
 	defer dbConn.Close()
 
@@ -51,7 +49,7 @@ func TestGetOverviewById(t *testing.T) {
 	}
 }
 
-func TestGetDetailById(t *testing.T) {
+func TestRepositoryGetDetailById(t *testing.T) {
 	dbConn, repo := repoPrep(t)
 	defer dbConn.Close()
 	ctx := context.Background()
@@ -71,7 +69,7 @@ func TestGetDetailById(t *testing.T) {
 	}
 }
 
-func TestCreateUpdateDeleteProject(t *testing.T) {
+func TestRepositoryCreateUpdateDeleteProject(t *testing.T) {
 	dbConn, repo := repoPrep(t)
 	defer dbConn.Close()
 	ctx := context.Background()
@@ -96,6 +94,7 @@ func TestCreateUpdateDeleteProject(t *testing.T) {
 	}
 
 	// UPDATE
+
 	newTitle, newDesc, newDocURL := "NEW TEST TITLE", "NEW TEST DESCRIPTION", "NEW TEST DOC URL"
 	newProj.Title = util.ToPointer(newTitle)
 	newProj.Description = util.ToPointer(newDesc)
@@ -117,7 +116,7 @@ func TestCreateUpdateDeleteProject(t *testing.T) {
 }
 
 func repoPrep(t *testing.T) (*sqlx.DB, project.Repository) {
-	db, err := sqlx.Open("postgres", DSN)
+	db, err := sqlx.Open("postgres", testDSN)
 
 	if err != nil {
 		t.Fatalf("Failed to initialize Test DB connection err=%+v", err)
