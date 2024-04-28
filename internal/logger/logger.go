@@ -30,6 +30,10 @@ var defaultLogger = zap.New(zapcore.NewCore(
 	zap.NewAtomicLevelAt(zapcore.InfoLevel),
 ), zap.AddCaller(), zap.AddCallerSkip(1))
 
+func New() *zap.Logger {
+	return defaultLogger
+}
+
 func From(ctx context.Context) *zap.Logger {
 	if l, ok := ctx.Value(loggerKey).(*zap.Logger); ok {
 		return l

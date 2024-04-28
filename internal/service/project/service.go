@@ -21,10 +21,6 @@ type Service interface {
 	Delete(context.Context, string) error
 }
 
-type Project struct {
-	model.Project
-}
-
 type service struct {
 	repo Repository
 }
