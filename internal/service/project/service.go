@@ -14,6 +14,11 @@ var validate = validator.New(validator.WithRequiredStructEnabled())
 
 type Service interface {
 	GetAll(context.Context, GetAllRequest) (projects []model.Project, nextCursor string, err error)
+	GetOverviewById(context.Context, string) (*model.Project, error)
+	GetDetailById(context.Context, string) (*model.Project, error)
+	Create(context.Context, CreateRequest) (*model.Project, error)
+	Update(context.Context, UpdateRequest) (*model.Project, error)
+	Delete(context.Context, string) error
 }
 
 type Project struct {
@@ -66,7 +71,7 @@ func (s *service) GetDetailById(ctx context.Context, id string) (*model.Project,
 }
 
 type CreateRequest struct {
-	UserID      uint64
+	UserID      uint64 `validate:"required"`
 	Title       string `validate:"required"`
 	Description *string
 	Route       *string
