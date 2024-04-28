@@ -4,7 +4,10 @@ import (
 	"net/http"
 )
 
-// TODO: NEED Auth Implemented
+func RegisterRoutes(router *http.ServeMux) {
+
+}
+
 type Handler struct {
 	service Service
 }
