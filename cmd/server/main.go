@@ -21,6 +21,7 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
+
 	defer dbConn.Close()
 
 	if err := db.DropAllTable(dbConn); err != nil {

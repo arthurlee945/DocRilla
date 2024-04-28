@@ -1,9 +1,13 @@
 package middleware
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/arthurlee945/Docrilla/internal/logger"
+	"go.uber.org/zap"
 )
 
 type wrapperWriter struct {
@@ -25,5 +29,10 @@ func Logger(next http.Handler) http.Handler {
 		next.ServeHTTP(wrapped, r)
 
 		log.Println(wrapped.statusCode, r.Method, r.URL.Path, time.Since(start))
+		logger.New().Info(
+			fmt.Sprintf("%s %s", r.Method, r.URL.Path),
+			zap.Int("statusCode", wrapped.statusCode),
+			zap.String("duration", time.Since(start).String()),
+		)
 	})
 }
