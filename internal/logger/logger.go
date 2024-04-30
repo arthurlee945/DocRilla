@@ -30,18 +30,22 @@ var defaultLogger = zap.New(zapcore.NewCore(
 	zap.NewAtomicLevelAt(zapcore.InfoLevel),
 ), zap.AddCaller(), zap.AddCallerSkip(1))
 
-func New() *zap.Logger {
-	return defaultLogger
+type Logger struct {
+	zap.Logger
 }
 
-func From(ctx context.Context) *zap.Logger {
-	if l, ok := ctx.Value(loggerKey).(*zap.Logger); ok {
+func New() *Logger {
+	return &Logger{*defaultLogger}
+}
+
+func From(ctx context.Context) *Logger {
+	if l, ok := ctx.Value(loggerKey).(*Logger); ok {
 		return l
 	}
-	return defaultLogger
+	return &Logger{*defaultLogger}
 }
 
-func With(ctx context.Context, l *zap.Logger) context.Context {
+func With(ctx context.Context, l *Logger) context.Context {
 	return context.WithValue(ctx, loggerKey, l)
 }
 
@@ -49,7 +53,8 @@ func WithFields(ctx context.Context, fields ...zap.Field) context.Context {
 	if len(fields) == 0 {
 		return ctx
 	}
-	return With(ctx, From(ctx).With(fields...))
+
+	return With(ctx, &Logger{*From(ctx).With(fields...)})
 }
 
 func Sync(ctx context.Context) error {

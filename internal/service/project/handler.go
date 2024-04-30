@@ -4,10 +4,6 @@ import (
 	"net/http"
 )
 
-func RegisterRoutes(router *http.ServeMux) {
-
-}
-
 type Handler struct {
 	service Service
 }
