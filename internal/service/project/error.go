@@ -4,10 +4,10 @@ import "github.com/arthurlee945/Docrilla/internal/errors"
 
 const (
 	//REPOSITORY
-	ErrRepoGet    = errors.Error("project_repo_get: couldn't find the project.")
-	ErrRepoCreate = errors.Error("project_repo_create: project couldn't be created.")
-	ErrRepoUpdate = errors.Error("project_repo_update: project couldn't update.")
-	ErrRepoDelete = errors.Error("project_repo_delete: project couldn't delete.")
+	ErrRepoGet    = errors.Error("project_repo_get: couldn't get the project.")
+	ErrRepoCreate = errors.Error("project_repo_create: couldn't create project.")
+	ErrRepoUpdate = errors.Error("project_repo_update: couldn't update project.")
+	ErrRepoDelete = errors.Error("project_repo_delete: couldn't delete project.")
 	//SERVICE
 	ErrInvalidUUID   = errors.Error("project_service_bad_request: uuid provided is not valid format.")
 	ErrInvalidReqObj = errors.Error("project_service_bad_request: validation failed for request object")

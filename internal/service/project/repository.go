@@ -111,14 +111,15 @@ func (r *repository) Update(ctx context.Context, proj *model.Project) (*model.Pr
 	WHERE uuid=:uuid RETURNING *
 	`, proj)
 	if err != nil {
-		return nil, err
+		return nil, ErrRepoUpdate.Wrap(err)
 	}
 	defer rows.Close()
 	updatedProj := &model.Project{}
-	for rows.Next() {
-		if err := rows.StructScan(updatedProj); err != nil {
-			return nil, err
-		}
+	if !rows.Next() {
+		return nil, ErrRepoUpdate.Wrap(errors.ErrNotFound)
+	}
+	if err := rows.StructScan(updatedProj); err != nil {
+		return nil, ErrRepoUpdate.Wrap(err)
 	}
 	return updatedProj, nil
 }
