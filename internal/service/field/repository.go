@@ -9,6 +9,10 @@ import (
 )
 
 type Repository interface {
+	GetById(ctx context.Context, uuid string) (*model.Field, error)
+	Create(ctx context.Context, field *model.Field) (*model.Field, error)
+	Update(ctx context.Context, field *model.Field) (*model.Field, error)
+	Delete(ctx context.Context, uuid string) error
 }
 
 type repository struct {
@@ -21,7 +25,7 @@ func NewRepository(db *sqlx.DB) Repository {
 	}
 }
 
-func (r *repository) Get(ctx context.Context, uuid string) (*model.Field, error) {
+func (r *repository) GetById(ctx context.Context, uuid string) (*model.Field, error) {
 	field := &model.Field{}
 	if err := r.db.GetContext(ctx, field, `SELECT * FROM field WHERE uuid = $1`, uuid); err != nil {
 		return nil, ErrRepoGet.Wrap(err)
@@ -33,18 +37,18 @@ func (r *repository) Create(ctx context.Context, field *model.Field) (*model.Fie
 	rows, err := r.db.NamedQueryContext(ctx,
 		`
 	INSERT INTO field (project_id, x1, y1, x2, y2, page, type)
-	VALUE (:project_id, :x1, :y1, :x2, :y2, page, type) RETURNING * 	
+	VALUES (:project_id, :x1, :y1, :x2, :y2, :page, :type) RETURNING * 	
 	`, field)
 	if err != nil {
-		return nil, ErrRepoUpdate.Wrap(err)
+		return nil, ErrRepoCreate.Wrap(err)
 	}
 	defer rows.Close()
 	if !rows.Next() {
-		return nil, ErrRepoUpdate.Wrap(errors.ErrNotFound)
+		return nil, ErrRepoCreate.Wrap(errors.ErrNotFound)
 	}
 	createdProj := &model.Field{}
 	if err := rows.StructScan(createdProj); err != nil {
-		return nil, ErrRepoUpdate.Wrap(err)
+		return nil, ErrRepoCreate.Wrap(err)
 	}
 	return createdProj, nil
 }
@@ -62,7 +66,7 @@ func (r *repository) Update(ctx context.Context, field *model.Field) (*model.Fie
 	WHERE uuid=:uuid RETURNING *
 	`, field)
 	if err != nil {
-		return nil, err
+		return nil, ErrRepoUpdate.Wrap(err)
 	}
 	defer rows.Close()
 	updatedField := &model.Field{}

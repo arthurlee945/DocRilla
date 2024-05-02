@@ -2,7 +2,6 @@ package project_test
 
 import (
 	"context"
-	"reflect"
 	"testing"
 	"time"
 
@@ -14,7 +13,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-func TestRepositoryGetAll(t *testing.T) {
+func TestProjectRepositoryGetAll(t *testing.T) {
 	dbConn, repo := repoPrep(t)
 	defer dbConn.Close()
 
@@ -28,7 +27,7 @@ func TestRepositoryGetAll(t *testing.T) {
 	}
 }
 
-func TestRepositoryGetOverviewById(t *testing.T) {
+func TestProjectRepositoryGetOverviewById(t *testing.T) {
 	dbConn, repo := repoPrep(t)
 	defer dbConn.Close()
 
@@ -44,12 +43,9 @@ func TestRepositoryGetOverviewById(t *testing.T) {
 	if *proj.UUID == "" || *proj.Title == "" || *proj.Archived != false || proj.CreatedAt.IsZero() {
 		t.Errorf("Expected GetOverviewById to return all values specified, but got = %+v", proj)
 	}
-	if reflect.DeepEqual(proj, &mock.Project) {
-		t.Errorf("Expected GetOverviewById project to equal to test project expected = %+v, got = %+v", mock.Project, proj)
-	}
 }
 
-func TestRepositoryGetDetailById(t *testing.T) {
+func TestProjectRepositoryGetDetailById(t *testing.T) {
 	dbConn, repo := repoPrep(t)
 	defer dbConn.Close()
 	ctx := context.Background()

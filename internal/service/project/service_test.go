@@ -10,7 +10,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-func TestServiceCRUDValidation(t *testing.T) {
+func TestProjectServiceCRUDValidation(t *testing.T) {
 	dbConn, service := servicePrep(t)
 	defer dbConn.Close()
 	ctx := context.Background()

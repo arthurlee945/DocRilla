@@ -3,7 +3,7 @@ package model
 import (
 	"time"
 
-	"github.com/arthurlee945/Docrilla/internal/model/enum/user"
+	userEnum "github.com/arthurlee945/Docrilla/internal/model/enum/user"
 )
 
 type Account struct {
@@ -22,22 +22,22 @@ type Account struct {
 }
 
 type User struct {
-	ID                     *uint64    `json:"id" db:"id"`
-	Name                   *string    `json:"name" db:"name"`
-	Email                  *string    `json:"email" db:"email"`
-	EmailVerified          *bool      `json:"emailVerified" db:"email_verified"`
-	EmailVerificationToken *string    `json:"emailVerificationToken" db:"email_verification_token"`
-	Password               *string    `json:"password" db:"password"`
-	PasswordChangedAt      *time.Time `json:"passwordChangedAt" db:"password_changed_at"`
-	ResetPasswordToken     *string    `json:"resetPasswordToken" db:"reset_password_token"`
-	ResetPasswordExpires   *time.Time `json:"resetPasswordExpires" db:"reset_password_expires"`
-	Role                   *user.Role `json:"role" db:"role"`
-	Active                 *bool      `json:"active" db:"active"`
-	CreatedAt              *time.Time `json:"createdAt" db:"created_at"`
-	UpdatedAt              *time.Time `json:"updatedAt" db:"updated_at"`
-	Projects               []Project  `json:"projects"`
-	Accounts               []Account  `json:"accounts"`
-	Sessions               []Session  `json:"session"`
+	ID                     *uint64        `json:"id" db:"id"`
+	Name                   *string        `json:"name" db:"name"`
+	Email                  *string        `json:"email" db:"email"`
+	EmailVerified          *bool          `json:"emailVerified" db:"email_verified"`
+	EmailVerificationToken *string        `json:"emailVerificationToken" db:"email_verification_token"`
+	Password               *string        `json:"password" db:"password"`
+	PasswordChangedAt      *time.Time     `json:"passwordChangedAt" db:"password_changed_at"`
+	ResetPasswordToken     *string        `json:"resetPasswordToken" db:"reset_password_token"`
+	ResetPasswordExpires   *time.Time     `json:"resetPasswordExpires" db:"reset_password_expires"`
+	Role                   *userEnum.Role `json:"role" db:"role"`
+	Active                 *bool          `json:"active" db:"active"`
+	CreatedAt              *time.Time     `json:"createdAt" db:"created_at"`
+	UpdatedAt              *time.Time     `json:"updatedAt" db:"updated_at"`
+	Projects               []Project      `json:"projects"`
+	Accounts               []Account      `json:"accounts"`
+	Sessions               []Session      `json:"session"`
 }
 
 type Session struct {
