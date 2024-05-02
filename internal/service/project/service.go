@@ -25,10 +25,8 @@ type service struct {
 	repo Repository
 }
 
-func NewService(r Repository) Service {
-	return &service{
-		repo: r,
-	}
+func NewService(repo Repository) Service {
+	return &service{repo}
 }
 
 type GetAllRequest struct {

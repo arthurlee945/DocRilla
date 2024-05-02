@@ -79,7 +79,7 @@ model project {
   user_id      Int
   uuid         String       @unique @default(uuid())
   route        String       @unique @default(uuid())
-  token        String
+  token        String?
   title        String
   description  String?
   document_url String
@@ -97,32 +97,35 @@ model project {
 model field {
   id         Int               @id @default(autoincrement())
   uuid       String            @unique @default(uuid())
-  project_id Int
-  x1         Float
-  y1         Float
-  x2         Float
-  y2         Float
+  project_id String
+  x          Float
+  y          Float
+  width      Float
+  height     Float
   page       Int
   type       project_type
   fields     submitted_field[]
-  project    project           @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  project    project           @relation(fields: [project_id], references: [uuid], onDelete: Cascade)
 
   @@index([uuid])
 }
 
 model submission {
   id               Int               @id @default(autoincrement())
-  project_id       Int
+  uuid             String            @unique @default(uuid())
+  project_id       String
   submitted_at     DateTime          @default(now())
   submitted_fields submitted_field[]
-  project          project           @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  project          project           @relation(fields: [project_id], references: [uuid], onDelete: Cascade)
+
+  @@index([uuid])
 }
 
 model submitted_field {
   id            Int        @id @default(autoincrement())
-  field_id      Int
-  submission_id Int
+  field_id      String
+  submission_id String
   value         Bytes
-  submission    submission @relation(fields: [submission_id], references: [id], onDelete: Cascade)
-  field         field      @relation(fields: [field_id], references: [id], onDelete: Cascade)
+  submission    submission @relation(fields: [submission_id], references: [uuid], onDelete: Cascade)
+  field         field      @relation(fields: [field_id], references: [uuid], onDelete: Cascade)
 }

@@ -36,11 +36,11 @@ var (
 	Field1 = model.Field{
 		ID:        util.ToPointer[uint64](1),
 		UUID:      util.ToPointer("4f836019-e3d0-4ddf-8d4d-93d41eb2c01b"),
-		ProjectID: Project.ID,
-		X1:        util.ToPointer[float64](0),
-		Y1:        util.ToPointer[float64](0),
-		X2:        util.ToPointer[float64](24),
-		Y2:        util.ToPointer[float64](24),
+		ProjectID: Project.UUID,
+		X:         util.ToPointer[float64](0),
+		Y:         util.ToPointer[float64](0),
+		Width:     util.ToPointer[float64](24),
+		Height:    util.ToPointer[float64](24),
 		Page:      util.ToPointer[uint32](1),
 		Type:      util.ToPointer(field.TEXT),
 	}
@@ -48,11 +48,11 @@ var (
 	Field2 = model.Field{
 		ID:        util.ToPointer[uint64](2),
 		UUID:      util.ToPointer("8d566b8a-10be-4610-be14-316d0313fce0"),
-		ProjectID: Project.ID,
-		X1:        util.ToPointer[float64](34),
-		Y1:        util.ToPointer[float64](50),
-		X2:        util.ToPointer[float64](524),
-		Y2:        util.ToPointer[float64](124),
+		ProjectID: Project.UUID,
+		X:         util.ToPointer[float64](34),
+		Y:         util.ToPointer[float64](50),
+		Width:     util.ToPointer[float64](524),
+		Height:    util.ToPointer[float64](124),
 		Page:      util.ToPointer[uint32](1),
 		Type:      util.ToPointer(field.TEXT),
 	}

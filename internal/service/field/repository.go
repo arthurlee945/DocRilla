@@ -36,8 +36,8 @@ func (r *repository) GetById(ctx context.Context, uuid string) (*model.Field, er
 func (r *repository) Create(ctx context.Context, field *model.Field) (*model.Field, error) {
 	rows, err := r.db.NamedQueryContext(ctx,
 		`
-	INSERT INTO field (project_id, x1, y1, x2, y2, page, type)
-	VALUES (:project_id, :x1, :y1, :x2, :y2, :page, :type) RETURNING * 	
+	INSERT INTO field (project_id, x, y, width, height, page, type)
+	VALUES (:project_id, :x, :y, :width, :height, :page, :type) RETURNING * 	
 	`, field)
 	if err != nil {
 		return nil, ErrRepoCreate.Wrap(err)
@@ -57,13 +57,13 @@ func (r *repository) Update(ctx context.Context, field *model.Field) (*model.Fie
 	rows, err := r.db.NamedQueryContext(ctx,
 		`UPDATE field
 	SET
-	x1 = COALESCE(:x1, x1),
-	y1 = COALESCE(:y1, y1),
-	x2 = COALESCE(:x2, x2),
-	y2 = COALESCE(:y2, y2),
+	x = COALESCE(:x, x),
+	y = COALESCE(:y, y),
+	width = COALESCE(:width, width),
+	height = COALESCE(:height, height),
 	page = COALESCE(:page, page),
 	type = COALESCE(:type, type)
-	WHERE uuid=:uuid RETURNING *
+	WHERE uuid=:uuid AND project_id=:project_id RETURNING *
 	`, field)
 	if err != nil {
 		return nil, ErrRepoUpdate.Wrap(err)

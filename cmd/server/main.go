@@ -25,7 +25,7 @@ func main() {
 	}
 }
 
-func run(ctx context.Context, w io.Writer, args []string) error {
+func run(ctx context.Context, w io.Writer, _ []string) error {
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
 	cfg, err := config.Load(ctx)
 	if err != nil {
@@ -39,6 +39,10 @@ func run(ctx context.Context, w io.Writer, args []string) error {
 		dbConn.Close()
 		cancel()
 	}()
+	if err := devtool(dbConn); err != nil {
+		return err
+	}
+	// Might not need this
 	http := flag.String("http", ":8080", "HTTP service address (e.g.. '127.0.0.1:8080' or ':8080')")
 	flag.Parse()
 
@@ -59,4 +63,14 @@ func devtool(dbConn *sqlx.DB) error {
 		return err
 	}
 	return nil
+}
+
+func httpLink(addr string, secure bool) string {
+	if addr[0] == ':' {
+		addr = "localhost" + addr
+	}
+	if secure {
+		return "https://" + addr
+	}
+	return "http://" + addr
 }

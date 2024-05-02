@@ -63,8 +63,8 @@ func Seed(db *sqlx.DB) error {
 	// Field Gen
 	for _, field := range []*model.Field{&mock.Field1, &mock.Field2} {
 		if _, err := db.NamedExec(`
-		INSERT INTO field (uuid, project_id, x1, y1, x2, y2, page, type)
-		VALUES (:uuid, :project_id, :x1, :y1, :x2, :y2, :page, :type)
+		INSERT INTO field (uuid, project_id, x, y, width, height, page, type)
+		VALUES (:uuid, :project_id, :x, :y, :width, :height, :page, :type)
 		`, field); err != nil {
 			return ErrFailedToSeedDB.Wrap(err)
 		}

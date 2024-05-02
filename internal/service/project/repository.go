@@ -71,7 +71,7 @@ func (r *repository) GetDetailById(ctx context.Context, uuid string) (*model.Pro
 	if err := r.db.GetContext(ctx, proj, `SELECT * FROM project WHERE uuid = $1`, uuid); err != nil {
 		return nil, ErrRepoGet.Wrap(err)
 	}
-	if err := r.db.SelectContext(ctx, &fields, `SELECT * FROM field WHERE project_id = $1`, proj.ID); err != nil {
+	if err := r.db.SelectContext(ctx, &fields, `SELECT * FROM field WHERE project_id = $1`, proj.UUID); err != nil {
 		return nil, ErrRepoGet.Wrap(err)
 	}
 	proj.Fields = fields

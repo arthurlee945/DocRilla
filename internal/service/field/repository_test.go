@@ -27,10 +27,10 @@ func TestFieldRepositoryGetById(t *testing.T) {
 		t.Errorf("Expected Get to return *model.Field. got = %+v", err)
 	}
 	if *field.UUID != *mock.Field1.UUID ||
-		*field.X1 != *mock.Field1.X1 ||
-		*field.Y1 != *mock.Field1.Y1 ||
-		*field.X2 != *mock.Field1.X2 ||
-		*field.Y2 != *mock.Field1.Y2 ||
+		*field.X != *mock.Field1.X ||
+		*field.Y != *mock.Field1.Y ||
+		*field.Width != *mock.Field1.Width ||
+		*field.Height != *mock.Field1.Height ||
 		*field.Page != *mock.Field1.Page ||
 		*field.Type != *mock.Field1.Type {
 		t.Errorf("Expected Get to return all values specified, but got = %+v", map[string]any{
@@ -46,41 +46,46 @@ func TestFieldRepositoryCreateUpdateDeleteProject(t *testing.T) {
 	defer dbConn.Close()
 	ctx := context.Background()
 
-	x1, y1, x2, y2, uType := 8.0, 88.0, 88.8, 88.88, fieldEnum.TEXT
+	x, y, width, height, uType := 8.0, 88.0, 88.8, 88.88, fieldEnum.TEXT
 
 	mockField := &model.Field{
-		ProjectID: mock.Project.ID,
-		X1:        util.ToPointer(x1),
-		Y1:        util.ToPointer(y1),
-		X2:        util.ToPointer(x2),
-		Y2:        util.ToPointer(y2),
+		ProjectID: mock.Project.UUID,
+		X:         util.ToPointer(x),
+		Y:         util.ToPointer(y),
+		Width:     util.ToPointer(width),
+		Height:    util.ToPointer(height),
 		Page:      util.ToPointer[uint32](2),
 		Type:      util.ToPointer(uType),
 	}
 	//CREATE
 	newField, err := repo.Create(ctx, mockField)
 	if err != nil {
-		t.Errorf("Expected Create to return Project, but got err = %+v", err)
+		t.Fatalf("Expected Create to return Project, but got err = %+v", err)
 	}
-	if *newField.X1 != x1 || *newField.Y1 != y1 || *newField.X2 != x2 || *newField.Y2 != y2 || *newField.Type != uType {
+	if *newField.X != x || *newField.Y != y || *newField.Width != width || *newField.Height != height || *newField.Type != uType {
 		t.Errorf("Expected Created New Project to contain correct values but got = %+v", newField)
 	}
 
 	// UPDATE
 
 	newPos := [4]float64{1, 2, 3, 4}
-	newField.X1 = util.ToPointer(newPos[0])
-	newField.Y1 = util.ToPointer(newPos[1])
-	newField.X2 = util.ToPointer(newPos[2])
-	newField.Y2 = util.ToPointer(newPos[3])
+	newField.X = util.ToPointer(newPos[0])
+	newField.Y = util.ToPointer(newPos[1])
+	newField.Width = util.ToPointer(newPos[2])
+	newField.Height = util.ToPointer(newPos[3])
 
 	updatedField, err := repo.Update(ctx, newField)
 	if err != nil {
-		t.Errorf("Expected Update to not throw but got err = %+v", err)
+		t.Fatalf("Expected Update to not throw but got err = %+v", err)
 	}
 
-	if *updatedField.X1 != newPos[0] || *updatedField.Y1 != newPos[1] || *updatedField.X2 != newPos[2] || *updatedField.Y2 != newPos[3] {
-		t.Errorf("Expected Updated Project to contain correct values but got = %+v", updatedField)
+	if *updatedField.X != newPos[0] || *updatedField.Y != newPos[1] || *updatedField.Width != newPos[2] || *updatedField.Height != newPos[3] {
+		t.Errorf("Expected Updated Project to contain correct values but got = %+v", map[string]any{
+			"X":      *updatedField.X,
+			"Y":      *updatedField.Y,
+			"Width":  *updatedField.Width,
+			"Height": *updatedField.Height,
+		})
 	}
 
 	// DELETE

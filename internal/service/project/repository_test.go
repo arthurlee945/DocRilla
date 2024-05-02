@@ -65,7 +65,7 @@ func TestProjectRepositoryGetDetailById(t *testing.T) {
 	}
 }
 
-func TestRepositoryCreateUpdateDeleteProject(t *testing.T) {
+func TestProjectRepositoryCreateUpdateDeleteProject(t *testing.T) {
 	dbConn, repo := repoPrep(t)
 	defer dbConn.Close()
 	ctx := context.Background()

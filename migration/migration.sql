@@ -80,11 +80,11 @@ CREATE TABLE "project" (
 CREATE TABLE "field" (
     "id" SERIAL NOT NULL,
     "uuid" TEXT NOT NULL DEFAULT gen_random_uuid(),
-    "project_id" INTEGER NOT NULL,
-    "x1" DOUBLE PRECISION NOT NULL,
-    "y1" DOUBLE PRECISION NOT NULL,
-    "x2" DOUBLE PRECISION NOT NULL,
-    "y2" DOUBLE PRECISION NOT NULL,
+    "project_id" TEXT NOT NULL,
+    "x" DOUBLE PRECISION NOT NULL,
+    "y" DOUBLE PRECISION NOT NULL,
+    "width" DOUBLE PRECISION NOT NULL,
+    "height" DOUBLE PRECISION NOT NULL,
     "page" INTEGER NOT NULL,
     "type" "project_type" NOT NULL,
 
@@ -94,7 +94,8 @@ CREATE TABLE "field" (
 -- CreateTable
 CREATE TABLE "submission" (
     "id" SERIAL NOT NULL,
-    "project_id" INTEGER NOT NULL,
+    "uuid" TEXT NOT NULL DEFAULT gen_random_uuid(),
+    "project_id" TEXT NOT NULL,
     "submitted_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "submission_pkey" PRIMARY KEY ("id")
@@ -103,8 +104,8 @@ CREATE TABLE "submission" (
 -- CreateTable
 CREATE TABLE "submitted_field" (
     "id" SERIAL NOT NULL,
-    "field_id" INTEGER NOT NULL,
-    "submission_id" INTEGER NOT NULL,
+    "field_id" TEXT NOT NULL,
+    "submission_id" TEXT NOT NULL,
     "value" BYTEA NOT NULL,
 
     CONSTRAINT "submitted_field_pkey" PRIMARY KEY ("id")
@@ -140,6 +141,12 @@ CREATE UNIQUE INDEX "field_uuid_key" ON "field"("uuid");
 -- CreateIndex
 CREATE INDEX "field_uuid_idx" ON "field"("uuid");
 
+-- CreateIndex
+CREATE UNIQUE INDEX "submission_uuid_key" ON "submission"("uuid");
+
+-- CreateIndex
+CREATE INDEX "submission_uuid_idx" ON "submission"("uuid");
+
 -- AddForeignKey
 ALTER TABLE "account" ADD CONSTRAINT "account_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "usr"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
@@ -150,13 +157,13 @@ ALTER TABLE "session" ADD CONSTRAINT "session_user_id_fkey" FOREIGN KEY ("user_i
 ALTER TABLE "project" ADD CONSTRAINT "project_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "usr"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "field" ADD CONSTRAINT "field_project_id_fkey" FOREIGN KEY ("project_id") REFERENCES "project"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "field" ADD CONSTRAINT "field_project_id_fkey" FOREIGN KEY ("project_id") REFERENCES "project"("uuid") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "submission" ADD CONSTRAINT "submission_project_id_fkey" FOREIGN KEY ("project_id") REFERENCES "project"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "submission" ADD CONSTRAINT "submission_project_id_fkey" FOREIGN KEY ("project_id") REFERENCES "project"("uuid") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "submitted_field" ADD CONSTRAINT "submitted_field_submission_id_fkey" FOREIGN KEY ("submission_id") REFERENCES "submission"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "submitted_field" ADD CONSTRAINT "submitted_field_submission_id_fkey" FOREIGN KEY ("submission_id") REFERENCES "submission"("uuid") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "submitted_field" ADD CONSTRAINT "submitted_field_field_id_fkey" FOREIGN KEY ("field_id") REFERENCES "field"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "submitted_field" ADD CONSTRAINT "submitted_field_field_id_fkey" FOREIGN KEY ("field_id") REFERENCES "field"("uuid") ON DELETE CASCADE ON UPDATE CASCADE;
