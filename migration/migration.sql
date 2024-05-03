@@ -63,7 +63,7 @@ CREATE TABLE "project" (
     "id" SERIAL NOT NULL,
     "user_id" INTEGER NOT NULL,
     "uuid" TEXT NOT NULL DEFAULT gen_random_uuid(),
-    "route" TEXT NOT NULL DEFAULT gen_random_uuid(),
+    "route" TEXT NOT NULL,
     "token" TEXT,
     "title" TEXT NOT NULL,
     "description" TEXT,

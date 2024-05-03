@@ -13,7 +13,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-func TestFieldRepositoryGetById(t *testing.T) {
+func TestFieldRepository_GetById(t *testing.T) {
 	dbConn, repo := repoPrep(t)
 	defer dbConn.Close()
 
@@ -41,7 +41,7 @@ func TestFieldRepositoryGetById(t *testing.T) {
 
 }
 
-func TestFieldRepositoryCreateUpdateDeleteProject(t *testing.T) {
+func TestFieldRepository_CreateUpdateDeleteProject(t *testing.T) {
 	dbConn, repo := repoPrep(t)
 	defer dbConn.Close()
 	ctx := context.Background()

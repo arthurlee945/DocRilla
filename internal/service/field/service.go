@@ -90,8 +90,8 @@ func (s *service) Update(ctx context.Context, req UpdateRequest) (*model.Field, 
 		return nil, ErrInvalidUUID.Wrap(fmt.Errorf("field id err=%+v; project id err =%+v", fErr, pErr))
 	}
 	reqField := &model.Field{
-		UUID:      util.ToPointer(req.UUID),
-		ProjectID: util.ToPointer(req.ProjectID),
+		UUID:      &req.UUID,
+		ProjectID: &req.ProjectID,
 		X:         req.X,
 		Y:         req.Y,
 		Width:     req.Width,

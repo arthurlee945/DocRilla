@@ -2,11 +2,13 @@ package project
 
 import (
 	"context"
+	"sync"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 
 	"github.com/arthurlee945/Docrilla/internal/model"
+	"github.com/arthurlee945/Docrilla/internal/service/field"
 	"github.com/arthurlee945/Docrilla/internal/util"
 )
 
@@ -22,11 +24,12 @@ type Service interface {
 }
 
 type service struct {
-	repo Repository
+	projRepository  Repository
+	fieldRepository field.Repository
 }
 
-func NewService(repo Repository) Service {
-	return &service{repo}
+func NewService(projRepository Repository, fieldReposity field.Repository) Service {
+	return &service{projRepository, fieldReposity}
 }
 
 type GetAllRequest struct {
@@ -35,7 +38,7 @@ type GetAllRequest struct {
 }
 
 func (s *service) GetAll(ctx context.Context, req GetAllRequest) ([]model.Project, string, error) {
-	projects, nextCursor, err := s.repo.GetAll(ctx, req.Limit, req.Cursor)
+	projects, nextCursor, err := s.projRepository.GetAll(ctx, req.Limit, req.Cursor)
 	if err != nil {
 		return nil, "", ErrRepoGet.Wrap(err)
 	}
@@ -46,7 +49,7 @@ func (s *service) GetOverviewById(ctx context.Context, id string) (*model.Projec
 	if err := uuid.Validate(id); err != nil {
 		return nil, ErrInvalidUUID.Wrap(err)
 	}
-	project, err := s.repo.GetOverviewById(ctx, id)
+	project, err := s.projRepository.GetOverviewById(ctx, id)
 	if err != nil {
 		return nil, ErrRepoGet.Wrap(err)
 	}
@@ -57,7 +60,7 @@ func (s *service) GetDetailById(ctx context.Context, id string) (*model.Project,
 	if err := uuid.Validate(id); err != nil {
 		return nil, ErrInvalidUUID.Wrap(err)
 	}
-	project, err := s.repo.GetDetailById(ctx, id)
+	project, err := s.projRepository.GetDetailById(ctx, id)
 	if err != nil {
 		return nil, ErrRepoGet.Wrap(err)
 	}
@@ -77,7 +80,12 @@ func (s *service) Create(ctx context.Context, req CreateRequest) (*model.Project
 	if err := validate.Struct(req); err != nil {
 		return nil, ErrInvalidReqObj.Wrap(err)
 	}
-	createdProj, err := s.repo.Create(ctx, &model.Project{
+
+	if req.Route == nil {
+		req.Route = util.ToPointer(uuid.NewString())
+	}
+
+	createdProj, err := s.projRepository.Create(ctx, &model.Project{
 		UserID:      util.ToPointer(req.UserID),
 		Title:       util.ToPointer(req.Title),
 		Description: req.Description,
@@ -99,6 +107,7 @@ type UpdateRequest struct {
 	DocumentUrl *string
 	Route       *string
 	Token       *string
+	Fields      []field.UpdateRequest
 }
 
 // ADD Field repo and update this
@@ -109,25 +118,71 @@ func (s *service) Update(ctx context.Context, req UpdateRequest) (*model.Project
 	if err := uuid.Validate(req.UUID); err != nil {
 		return nil, ErrInvalidUUID.Wrap(err)
 	}
-	updatedProj, err := s.repo.Update(ctx, &model.Project{
-		UUID:        util.ToPointer(req.UUID),
-		Title:       req.Title,
-		Description: req.Description,
-		DocumentUrl: req.DocumentUrl,
-		Route:       req.Route,
-		Token:       req.Token,
-	})
-	if err != nil {
+	projChan, errChan := make(chan *model.Project), make(chan error)
+	uCtx, uCancel := context.WithCancel(ctx)
+	defer uCancel()
+
+	go func() {
+		wg := sync.WaitGroup{}
+		wg.Add(len(req.Fields) + 1)
+		var uProj *model.Project
+		uFields := []model.Field{}
+
+		go func() {
+			defer wg.Done()
+			updatedProj, err := s.projRepository.Update(uCtx, &model.Project{
+				UUID:        util.ToPointer(req.UUID),
+				Title:       req.Title,
+				Description: req.Description,
+				DocumentUrl: req.DocumentUrl,
+				Route:       req.Route,
+				Token:       req.Token,
+			})
+			if err != nil {
+				errChan <- err
+				uCancel()
+			}
+			uProj = updatedProj
+		}()
+
+		for _, f := range req.Fields {
+			go func(fieldUpReq *field.UpdateRequest) {
+				defer wg.Done()
+				uField, err := s.fieldRepository.Update(uCtx, &model.Field{
+					UUID:      &fieldUpReq.UUID,
+					ProjectID: &req.UUID,
+					X:         fieldUpReq.X,
+					Y:         fieldUpReq.Y,
+					Width:     fieldUpReq.Width,
+					Height:    fieldUpReq.Height,
+					Page:      fieldUpReq.Page,
+					Type:      fieldUpReq.Type,
+				})
+				if err != nil {
+					errChan <- err
+					uCancel()
+				}
+				uFields = append(uFields, *uField)
+			}(&f)
+		}
+
+		wg.Wait()
+		uProj.Fields = uFields
+		projChan <- uProj
+	}()
+	select {
+	case err := <-errChan:
 		return nil, ErrServiceUpdate.Wrap(err)
+	case proj := <-projChan:
+		return proj, nil
 	}
-	return updatedProj, nil
 }
 
 func (s *service) Delete(ctx context.Context, id string) error {
 	if err := uuid.Validate(id); err != nil {
 		return ErrInvalidUUID.Wrap(err)
 	}
-	if err := s.repo.Delete(ctx, id); err != nil {
+	if err := s.projRepository.Delete(ctx, id); err != nil {
 		return ErrServiceDelete.Wrap(err)
 	}
 	return nil

@@ -13,7 +13,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-func TestProjectRepositoryGetAll(t *testing.T) {
+func TestProjectRepository_GetAll(t *testing.T) {
 	dbConn, repo := repoPrep(t)
 	defer dbConn.Close()
 
@@ -27,7 +27,7 @@ func TestProjectRepositoryGetAll(t *testing.T) {
 	}
 }
 
-func TestProjectRepositoryGetOverviewById(t *testing.T) {
+func TestProjectRepository_GetOverviewById(t *testing.T) {
 	dbConn, repo := repoPrep(t)
 	defer dbConn.Close()
 
@@ -45,7 +45,7 @@ func TestProjectRepositoryGetOverviewById(t *testing.T) {
 	}
 }
 
-func TestProjectRepositoryGetDetailById(t *testing.T) {
+func TestProjectRepository_GetDetailById(t *testing.T) {
 	dbConn, repo := repoPrep(t)
 	defer dbConn.Close()
 	ctx := context.Background()
@@ -65,7 +65,7 @@ func TestProjectRepositoryGetDetailById(t *testing.T) {
 	}
 }
 
-func TestProjectRepositoryCreateUpdateDeleteProject(t *testing.T) {
+func TestProjectRepository_CreateUpdateDeleteProject(t *testing.T) {
 	dbConn, repo := repoPrep(t)
 	defer dbConn.Close()
 	ctx := context.Background()

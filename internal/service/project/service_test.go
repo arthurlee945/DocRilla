@@ -5,12 +5,13 @@ import (
 	"testing"
 
 	"github.com/arthurlee945/Docrilla/internal/model/mock"
+	"github.com/arthurlee945/Docrilla/internal/service/field"
 	"github.com/arthurlee945/Docrilla/internal/service/project"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 )
 
-func TestProjectServiceCRUDValidation(t *testing.T) {
+func TestProjectService_CRUDValidation(t *testing.T) {
 	dbConn, service := servicePrep(t)
 	defer dbConn.Close()
 	ctx := context.Background()
@@ -84,6 +85,73 @@ func TestProjectServiceCRUDValidation(t *testing.T) {
 	}
 }
 
+func TestProjectService_CreateUpdateDelete(t *testing.T) {
+	dbConn, service := servicePrep(t)
+	fieldService := field.NewService(field.NewRepository(dbConn))
+	defer dbConn.Close()
+	ctx := context.Background()
+
+	mockProj, err := service.Create(ctx, project.CreateRequest{
+		UserID:      *mock.User.ID,
+		Title:       *mock.Project.Title,
+		DocumentUrl: *mock.Project.DocumentUrl,
+	})
+	if err != nil {
+		t.Fatalf("Expected Project service CREATE to return proj but got=%+v", err)
+	}
+	mockField, err := fieldService.Create(ctx, field.CreateRequest{
+		ProjectId: *mockProj.UUID,
+		X:         *mock.Field1.X,
+		Y:         *mock.Field1.Y,
+		Width:     *mock.Field1.Width,
+		Height:    *mock.Field1.Height,
+		Type:      *mock.Field1.Type,
+		Page:      *mock.Field1.Page,
+	})
+	if err != nil {
+		t.Fatalf("Expected Field service CREATE to return field but got=%+v", err)
+	}
+
+	uTitle, uDescription, uToken := "TEST UPDATE TITLE", "TEST UPDATE DESCRIPTION", "TEST TOKEN TOKEN"
+	uWidth, uHeight := 335.3, 293.5
+	uProj, uErr := service.Update(ctx, project.UpdateRequest{
+		UUID:        *mockProj.UUID,
+		Title:       &uTitle,
+		Description: &uDescription,
+		Token:       &uToken,
+		Fields: []field.UpdateRequest{
+			{
+				UUID:      *mockField.UUID,
+				ProjectID: *mockProj.UUID,
+				Width:     &uWidth,
+				Height:    &uHeight,
+			},
+		},
+	})
+	if uErr != nil {
+		t.Errorf("Expected Project Service UPDATE to return updated model.Project but got=%+v", uErr)
+	}
+	if *uProj.Title != uTitle || *uProj.Description != uDescription || *uProj.Token != uToken || len(uProj.Fields) != 1 {
+		t.Errorf("Expected Project UPDATE to return correct value but got=%+v", map[string]any{
+			"Title":      *uProj.Title,
+			"Desc":       *uProj.Description,
+			"Token":      *uProj.Token,
+			"fieldLenth": len(uProj.Fields),
+		})
+	}
+	uField := uProj.Fields[0]
+	if *uField.Width != uWidth || *uField.Height != uHeight {
+		t.Errorf("Expected Project UPDATE Field to return correct value but got=%+v", map[string]any{
+			"Width":  *uField.Width,
+			"Height": *uField.Height,
+		})
+	}
+
+	if err := service.Delete(ctx, *uProj.UUID); err != nil {
+		t.Errorf("Expected Project Service DELETE to success but got=%+v", err)
+	}
+}
+
 func servicePrep(t *testing.T) (*sqlx.DB, project.Service) {
 	db, err := sqlx.Open("postgres", testDSN)
 	if err != nil {
@@ -94,5 +162,5 @@ func servicePrep(t *testing.T) (*sqlx.DB, project.Service) {
 		t.Fatalf("Failed to initialize Test DB connection err=%+v", err)
 	}
 
-	return db, project.NewService(project.NewRepository(db))
+	return db, project.NewService(project.NewRepository(db), field.NewRepository(db))
 }
