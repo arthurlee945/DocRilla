@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/arthurlee945/Docrilla/internal/errors"
 	"github.com/arthurlee945/Docrilla/internal/model/mock"
 	"github.com/arthurlee945/Docrilla/internal/service/field"
 	"github.com/arthurlee945/Docrilla/internal/service/project"
@@ -31,7 +32,7 @@ func TestProjectService_CRUDValidation(t *testing.T) {
 	if getOverviewErr == nil {
 		t.Errorf("Expected GetOverviewById with incorrect ID Request to return Invalid ID error but got=nil")
 	}
-	if !project.ErrInvalidUUID.Is(getOverviewErr) {
+	if !errors.ErrInvalidRequest.Is(getOverviewErr) {
 		t.Errorf("Expected GetOverviewById Err to be invalid UUID but got=%+v", getOverviewErr)
 	}
 	if _, err := service.GetOverviewById(ctx, correctProjUUID); err != nil {
@@ -43,7 +44,7 @@ func TestProjectService_CRUDValidation(t *testing.T) {
 	if getDetailErr == nil {
 		t.Errorf("Expected GetDetailById with incorrect ID Request to return Invalid ID error but got=nil")
 	}
-	if !project.ErrInvalidUUID.Is(getDetailErr) {
+	if !errors.ErrInvalidRequest.Is(getDetailErr) {
 		t.Errorf("Expected GetDetailById Err to be invalid UUID but got=%+v", getDetailErr)
 	}
 	if _, err := service.GetDetailById(ctx, correctProjUUID); err != nil {
@@ -56,7 +57,7 @@ func TestProjectService_CRUDValidation(t *testing.T) {
 	if createErr == nil {
 		t.Errorf("Expected Create to return error but got=%+v", createProj)
 	}
-	if !project.ErrInvalidReqObj.Is(createErr) {
+	if !errors.ErrValidation.Is(createErr) {
 		t.Errorf("Expected Create to retuirn ErrInvalidReqObj but got=%+v", createErr)
 	}
 
@@ -66,7 +67,7 @@ func TestProjectService_CRUDValidation(t *testing.T) {
 	if udpateReqErr == nil {
 		t.Errorf("Expected Update to return error but got=%+v", updateProj)
 	}
-	if !project.ErrInvalidReqObj.Is(udpateReqErr) {
+	if !errors.ErrValidation.Is(udpateReqErr) {
 		t.Errorf("Expected Update to retuirn ErrInvalidReqObj but got=%+v", udpateReqErr)
 	}
 
@@ -75,7 +76,7 @@ func TestProjectService_CRUDValidation(t *testing.T) {
 	if getDetailErr == nil {
 		t.Errorf("Expected Update with incorrect ID Request to return Invalid ID error but got=nil")
 	}
-	if !project.ErrInvalidUUID.Is(updateUUIDErr) {
+	if !errors.ErrInvalidRequest.Is(updateUUIDErr) {
 		t.Errorf("Expected Update Err to be invalid UUID but got=%+v", updateUUIDErr)
 	}
 

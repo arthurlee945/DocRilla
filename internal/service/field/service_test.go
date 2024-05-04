@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/arthurlee945/Docrilla/internal/errors"
 	"github.com/arthurlee945/Docrilla/internal/model/mock"
 	"github.com/arthurlee945/Docrilla/internal/service/field"
 	"github.com/jmoiron/sqlx"
@@ -22,23 +23,11 @@ func TestFieldService_CRUDValidation(t *testing.T) {
 	if getOverviewErr == nil {
 		t.Errorf("Expected GetById with incorrect ID Request to return Invalid ID error but got=nil")
 	}
-	if !field.ErrInvalidUUID.Is(getOverviewErr) {
+	if !errors.ErrInvalidRequest.Is(getOverviewErr) {
 		t.Errorf("Expected GetById Err to be invalid UUID but got=%+v", getOverviewErr)
 	}
 	if _, err := service.GetById(ctx, correctFieldUUID); err != nil {
 		t.Errorf("Expected GetById to not return erro but got=%+v", err)
-	}
-
-	//GetDetailById
-	_, getDetailErr := service.GetById(ctx, invalidFieldUUID)
-	if getDetailErr == nil {
-		t.Errorf("Expected GetDetailById with incorrect ID Request to return Invalid ID error but got=nil")
-	}
-	if !field.ErrInvalidUUID.Is(getDetailErr) {
-		t.Errorf("Expected GetDetailById Err to be invalid UUID but got=%+v", getDetailErr)
-	}
-	if _, err := service.GetById(ctx, correctFieldUUID); err != nil {
-		t.Errorf("Expected GetDetailById to not return erro but got=%+v", err)
 	}
 
 	//Create
@@ -47,8 +36,8 @@ func TestFieldService_CRUDValidation(t *testing.T) {
 	if createErr == nil {
 		t.Errorf("Expected Create to return error but got=%+v", createProj)
 	}
-	if !field.ErrInvalidReqObj.Is(createErr) {
-		t.Errorf("Expected Create to retuirn ErrInvalidReqObj but got=%+v", createErr)
+	if !errors.ErrValidation.Is(createErr) {
+		t.Errorf("Expected Create to retuirn ErrValidation but got=%+v", createErr)
 	}
 
 	//Update
@@ -57,17 +46,17 @@ func TestFieldService_CRUDValidation(t *testing.T) {
 	if udpateReqErr == nil {
 		t.Errorf("Expected Update to return error but got=%+v", updateProj)
 	}
-	if !field.ErrInvalidReqObj.Is(udpateReqErr) {
-		t.Errorf("Expected Update to retuirn ErrInvalidReqObj but got=%+v", udpateReqErr)
+	if !errors.ErrValidation.Is(udpateReqErr) {
+		t.Errorf("Expected Update to retuirn ErrValidation but got=%+v", udpateReqErr)
 	}
 
 	invalidUpdateReq.UUID = invalidFieldUUID
 	invalidUpdateReq.ProjectID = invalidFieldUUID
 	_, updateUUIDErr := service.Update(ctx, invalidUpdateReq)
-	if getDetailErr == nil {
+	if updateUUIDErr == nil {
 		t.Errorf("Expected Update with incorrect ID Request to return Invalid ID error but got=nil")
 	}
-	if !field.ErrInvalidUUID.Is(updateUUIDErr) {
+	if !errors.ErrInvalidRequest.Is(updateUUIDErr) {
 		t.Errorf("Expected Update Err to be invalid UUID but got=%+v", updateUUIDErr)
 	}
 

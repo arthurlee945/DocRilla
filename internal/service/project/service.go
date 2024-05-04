@@ -7,6 +7,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 
+	"github.com/arthurlee945/Docrilla/internal/errors"
 	"github.com/arthurlee945/Docrilla/internal/model"
 	"github.com/arthurlee945/Docrilla/internal/service/field"
 	"github.com/arthurlee945/Docrilla/internal/util"
@@ -40,29 +41,29 @@ type GetAllRequest struct {
 func (s *service) GetAll(ctx context.Context, req GetAllRequest) ([]model.Project, string, error) {
 	projects, nextCursor, err := s.projRepository.GetAll(ctx, req.Limit, req.Cursor)
 	if err != nil {
-		return nil, "", ErrRepoGet.Wrap(err)
+		return nil, "", err
 	}
 	return projects, nextCursor, nil
 }
 
 func (s *service) GetOverviewById(ctx context.Context, id string) (*model.Project, error) {
 	if err := uuid.Validate(id); err != nil {
-		return nil, ErrInvalidUUID.Wrap(err)
+		return nil, errors.ErrInvalidRequest.Wrap(err)
 	}
 	project, err := s.projRepository.GetOverviewById(ctx, id)
 	if err != nil {
-		return nil, ErrRepoGet.Wrap(err)
+		return nil, err
 	}
 	return project, nil
 }
 
 func (s *service) GetDetailById(ctx context.Context, id string) (*model.Project, error) {
 	if err := uuid.Validate(id); err != nil {
-		return nil, ErrInvalidUUID.Wrap(err)
+		return nil, errors.ErrInvalidRequest.Wrap(err)
 	}
 	project, err := s.projRepository.GetDetailById(ctx, id)
 	if err != nil {
-		return nil, ErrRepoGet.Wrap(err)
+		return nil, err
 	}
 	return project, nil
 }
@@ -78,7 +79,7 @@ type CreateRequest struct {
 
 func (s *service) Create(ctx context.Context, req CreateRequest) (*model.Project, error) {
 	if err := validate.Struct(req); err != nil {
-		return nil, ErrInvalidReqObj.Wrap(err)
+		return nil, errors.ErrValidation.Wrap(err)
 	}
 
 	if req.Route == nil {
@@ -94,7 +95,7 @@ func (s *service) Create(ctx context.Context, req CreateRequest) (*model.Project
 		DocumentUrl: util.ToPointer(req.DocumentUrl),
 	})
 	if err != nil {
-		return nil, ErrServiceCreate.Wrap(err)
+		return nil, err
 	}
 	return createdProj, nil
 }
@@ -113,10 +114,10 @@ type UpdateRequest struct {
 // ADD Field repo and update this
 func (s *service) Update(ctx context.Context, req UpdateRequest) (*model.Project, error) {
 	if err := validate.Struct(req); err != nil {
-		return nil, ErrInvalidReqObj.Wrap(err)
+		return nil, errors.ErrValidation.Wrap(err)
 	}
 	if err := uuid.Validate(req.UUID); err != nil {
-		return nil, ErrInvalidUUID.Wrap(err)
+		return nil, errors.ErrInvalidRequest.Wrap(err)
 	}
 	projChan, errChan := make(chan *model.Project), make(chan error)
 	uCtx, uCancel := context.WithCancel(ctx)
@@ -172,7 +173,7 @@ func (s *service) Update(ctx context.Context, req UpdateRequest) (*model.Project
 	}()
 	select {
 	case err := <-errChan:
-		return nil, ErrServiceUpdate.Wrap(err)
+		return nil, err
 	case proj := <-projChan:
 		return proj, nil
 	}
@@ -180,10 +181,10 @@ func (s *service) Update(ctx context.Context, req UpdateRequest) (*model.Project
 
 func (s *service) Delete(ctx context.Context, id string) error {
 	if err := uuid.Validate(id); err != nil {
-		return ErrInvalidUUID.Wrap(err)
+		return errors.ErrInvalidRequest.Wrap(err)
 	}
 	if err := s.projRepository.Delete(ctx, id); err != nil {
-		return ErrServiceDelete.Wrap(err)
+		return err
 	}
 	return nil
 }

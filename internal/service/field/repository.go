@@ -28,7 +28,7 @@ func NewRepository(db *sqlx.DB) Repository {
 func (r *repository) GetById(ctx context.Context, uuid string) (*model.Field, error) {
 	field := &model.Field{}
 	if err := r.db.GetContext(ctx, field, `SELECT * FROM field WHERE uuid = $1`, uuid); err != nil {
-		return nil, ErrRepoGet.Wrap(err)
+		return nil, errors.RepoError(err)
 	}
 	return field, nil
 }
@@ -40,15 +40,15 @@ func (r *repository) Create(ctx context.Context, field *model.Field) (*model.Fie
 	VALUES (:project_id, :x, :y, :width, :height, :page, :type) RETURNING * 	
 	`, field)
 	if err != nil {
-		return nil, ErrRepoCreate.Wrap(err)
+		return nil, errors.RepoError(err)
 	}
 	defer rows.Close()
 	if !rows.Next() {
-		return nil, ErrRepoCreate.Wrap(errors.ErrNotFound)
+		return nil, errors.ErrNotFound
 	}
 	createdProj := &model.Field{}
 	if err := rows.StructScan(createdProj); err != nil {
-		return nil, ErrRepoCreate.Wrap(err)
+		return nil, errors.RepoError(err)
 	}
 	return createdProj, nil
 }
@@ -66,15 +66,15 @@ func (r *repository) Update(ctx context.Context, field *model.Field) (*model.Fie
 	WHERE uuid=:uuid AND project_id=:project_id RETURNING *
 	`, field)
 	if err != nil {
-		return nil, ErrRepoUpdate.Wrap(err)
+		return nil, errors.RepoError(err)
 	}
 	defer rows.Close()
 	updatedField := &model.Field{}
 	if !rows.Next() {
-		return nil, ErrRepoUpdate.Wrap(errors.ErrNotFound)
+		return nil, errors.ErrNotFound
 	}
 	if err := rows.StructScan(updatedField); err != nil {
-		return nil, ErrRepoUpdate.Wrap(err)
+		return nil, errors.RepoError(err)
 	}
 	return updatedField, nil
 }
@@ -84,7 +84,7 @@ func (r *repository) Delete(ctx context.Context, uuid string) error {
 	DELETE FROM field
 	WHERE uuid = $1 
 	`, uuid); err != nil {
-		return ErrRepoDelete.Wrap(err)
+		return errors.RepoError(err)
 	}
 	return nil
 }
