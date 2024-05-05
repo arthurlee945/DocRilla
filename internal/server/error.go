@@ -22,6 +22,8 @@ func HandleServerError(ctx context.Context, w http.ResponseWriter, err error) {
 		w.WriteHeader(http.StatusBadRequest)
 	case errors.Is(err, errors.ErrValidation):
 		w.WriteHeader(http.StatusBadRequest)
+	case errors.Is(err, errors.ErrUnauthorized):
+		w.WriteHeader(http.StatusUnauthorized)
 	case errors.Is(err, errors.ErrJSONEncoding):
 	case errors.Is(err, errors.ErrJSONDecoding):
 	default:

@@ -18,7 +18,7 @@ func TestProjectRepository_GetAll(t *testing.T) {
 	defer dbConn.Close()
 
 	ctx := context.Background()
-	projs, nextCursor, err := repo.GetAll(ctx, 10, "")
+	projs, nextCursor, err := repo.GetAll(ctx, 10, "", *mock.User.ID)
 	if err != nil {
 		t.Errorf("Expected GetAll to return Error, but got err = %+v; projs = %+v; nextCursor = %s", err, projs, nextCursor)
 	}
@@ -33,10 +33,10 @@ func TestProjectRepository_GetOverviewById(t *testing.T) {
 
 	ctx := context.Background()
 
-	if proj, err := repo.GetOverviewById(ctx, "wrongid"); err == nil {
+	if proj, err := repo.GetOverviewById(ctx, "wrongid", *mock.User.ID); err == nil {
 		t.Errorf("Expected GetOverviewById to return Error, but got err = %+v; proj = %+v", err, proj)
 	}
-	proj, err := repo.GetOverviewById(ctx, *mock.Project.UUID)
+	proj, err := repo.GetOverviewById(ctx, *mock.Project.UUID, *mock.User.ID)
 	if err != nil {
 		t.Errorf("Expected GetOverviewById to return *model.Project. got = %+v", err)
 	}
@@ -49,10 +49,10 @@ func TestProjectRepository_GetDetailById(t *testing.T) {
 	dbConn, repo := repoPrep(t)
 	defer dbConn.Close()
 	ctx := context.Background()
-	if proj, err := repo.GetDetailById(ctx, "wrongid"); err == nil {
+	if proj, err := repo.GetDetailById(ctx, "wrongid", *mock.User.ID); err == nil {
 		t.Errorf("Expected GetDetailById to return Error, but got err = %+v; proj = %+v", err, proj)
 	}
-	proj, err := repo.GetDetailById(ctx, *mock.Project.UUID)
+	proj, err := repo.GetDetailById(ctx, *mock.Project.UUID, *mock.User.ID)
 	if err != nil {
 		t.Errorf("Expected GetOverviewById to return *model.Project. got = %+v", err)
 	}
@@ -106,7 +106,7 @@ func TestProjectRepository_CreateUpdateDeleteProject(t *testing.T) {
 	}
 
 	// DELETE
-	if err := repo.Delete(ctx, *updatedProj.UUID); err != nil {
+	if err := repo.Delete(ctx, *updatedProj.UUID, *mock.User.ID); err != nil {
 		t.Errorf("Expected Delete to not throw but got err = %+v", err)
 	}
 }

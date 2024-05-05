@@ -6,6 +6,7 @@ import (
 
 	"github.com/arthurlee945/Docrilla/internal/errors"
 	"github.com/arthurlee945/Docrilla/internal/model/mock"
+	"github.com/arthurlee945/Docrilla/internal/service/auth"
 	"github.com/arthurlee945/Docrilla/internal/service/field"
 	"github.com/arthurlee945/Docrilla/internal/service/project"
 	"github.com/jmoiron/sqlx"
@@ -13,9 +14,8 @@ import (
 )
 
 func TestProjectService_CRUDValidation(t *testing.T) {
-	dbConn, service := servicePrep(t)
+	dbConn, service, ctx := servicePrep(t)
 	defer dbConn.Close()
-	ctx := context.Background()
 
 	//GetAll
 	getAllRequest := project.GetAllRequest{10, ""}
@@ -87,13 +87,11 @@ func TestProjectService_CRUDValidation(t *testing.T) {
 }
 
 func TestProjectService_CreateUpdateDelete(t *testing.T) {
-	dbConn, service := servicePrep(t)
+	dbConn, service, ctx := servicePrep(t)
 	fieldService := field.NewService(field.NewRepository(dbConn))
 	defer dbConn.Close()
-	ctx := context.Background()
 
 	mockProj, err := service.Create(ctx, project.CreateRequest{
-		UserID:      *mock.User.ID,
 		Title:       *mock.Project.Title,
 		DocumentUrl: *mock.Project.DocumentUrl,
 	})
@@ -153,8 +151,9 @@ func TestProjectService_CreateUpdateDelete(t *testing.T) {
 	}
 }
 
-func servicePrep(t *testing.T) (*sqlx.DB, project.Service) {
+func servicePrep(t *testing.T) (*sqlx.DB, project.Service, context.Context) {
 	db, err := sqlx.Open("postgres", testDSN)
+	ctx := context.Background()
 	if err != nil {
 		t.Fatalf("Failed to initialize Test DB connection err=%+v", err)
 	}
@@ -163,5 +162,5 @@ func servicePrep(t *testing.T) (*sqlx.DB, project.Service) {
 		t.Fatalf("Failed to initialize Test DB connection err=%+v", err)
 	}
 
-	return db, project.NewService(project.NewRepository(db), field.NewRepository(db))
+	return db, project.NewService(project.NewRepository(db), field.NewRepository(db)), context.WithValue(ctx, auth.AuthKey, &mock.User)
 }

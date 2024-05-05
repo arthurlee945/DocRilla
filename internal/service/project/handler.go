@@ -111,5 +111,13 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
-
+	id := r.PathValue("id")
+	err := h.service.Delete(r.Context(), id)
+	if err != nil {
+		server.HandleServerError(r.Context(), w, err)
+		return
+	}
+	if err := server.Encode(w, http.StatusAccepted, struct{}{}); err != nil {
+		server.HandleServerError(r.Context(), w, err)
+	}
 }

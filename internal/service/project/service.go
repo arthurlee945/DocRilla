@@ -9,6 +9,7 @@ import (
 
 	"github.com/arthurlee945/Docrilla/internal/errors"
 	"github.com/arthurlee945/Docrilla/internal/model"
+	"github.com/arthurlee945/Docrilla/internal/service/auth"
 	"github.com/arthurlee945/Docrilla/internal/service/field"
 	"github.com/arthurlee945/Docrilla/internal/util"
 )
@@ -39,7 +40,11 @@ type GetAllRequest struct {
 }
 
 func (s *service) GetAll(ctx context.Context, req GetAllRequest) ([]model.Project, string, error) {
-	projects, nextCursor, err := s.projRepository.GetAll(ctx, req.Limit, req.Cursor)
+	user, err := auth.GetUser(ctx)
+	if err != nil {
+		return nil, "", err
+	}
+	projects, nextCursor, err := s.projRepository.GetAll(ctx, req.Limit, req.Cursor, *user.ID)
 	if err != nil {
 		return nil, "", err
 	}
@@ -47,10 +52,14 @@ func (s *service) GetAll(ctx context.Context, req GetAllRequest) ([]model.Projec
 }
 
 func (s *service) GetOverviewById(ctx context.Context, id string) (*model.Project, error) {
+	user, err := auth.GetUser(ctx)
+	if err != nil {
+		return nil, err
+	}
 	if err := uuid.Validate(id); err != nil {
 		return nil, errors.ErrInvalidRequest.Wrap(err)
 	}
-	project, err := s.projRepository.GetOverviewById(ctx, id)
+	project, err := s.projRepository.GetOverviewById(ctx, id, *user.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -58,10 +67,14 @@ func (s *service) GetOverviewById(ctx context.Context, id string) (*model.Projec
 }
 
 func (s *service) GetDetailById(ctx context.Context, id string) (*model.Project, error) {
+	user, err := auth.GetUser(ctx)
+	if err != nil {
+		return nil, err
+	}
 	if err := uuid.Validate(id); err != nil {
 		return nil, errors.ErrInvalidRequest.Wrap(err)
 	}
-	project, err := s.projRepository.GetDetailById(ctx, id)
+	project, err := s.projRepository.GetDetailById(ctx, id, *user.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +82,6 @@ func (s *service) GetDetailById(ctx context.Context, id string) (*model.Project,
 }
 
 type CreateRequest struct {
-	UserID      uint64 `validate:"required"`
 	Title       string `validate:"required"`
 	Description *string
 	Route       *string
@@ -78,6 +90,10 @@ type CreateRequest struct {
 }
 
 func (s *service) Create(ctx context.Context, req CreateRequest) (*model.Project, error) {
+	user, err := auth.GetUser(ctx)
+	if err != nil {
+		return nil, err
+	}
 	if err := validate.Struct(req); err != nil {
 		return nil, errors.ErrValidation.Wrap(err)
 	}
@@ -87,7 +103,7 @@ func (s *service) Create(ctx context.Context, req CreateRequest) (*model.Project
 	}
 
 	createdProj, err := s.projRepository.Create(ctx, &model.Project{
-		UserID:      util.ToPointer(req.UserID),
+		UserID:      user.ID,
 		Title:       util.ToPointer(req.Title),
 		Description: req.Description,
 		Route:       req.Route,
@@ -113,6 +129,10 @@ type UpdateRequest struct {
 
 // ADD Field repo and update this
 func (s *service) Update(ctx context.Context, req UpdateRequest) (*model.Project, error) {
+	user, err := auth.GetUser(ctx)
+	if err != nil {
+		return nil, err
+	}
 	if err := validate.Struct(req); err != nil {
 		return nil, errors.ErrValidation.Wrap(err)
 	}
@@ -132,6 +152,7 @@ func (s *service) Update(ctx context.Context, req UpdateRequest) (*model.Project
 		go func() {
 			defer wg.Done()
 			updatedProj, err := s.projRepository.Update(uCtx, &model.Project{
+				UserID:      user.ID,
 				UUID:        util.ToPointer(req.UUID),
 				Title:       req.Title,
 				Description: req.Description,
@@ -180,10 +201,14 @@ func (s *service) Update(ctx context.Context, req UpdateRequest) (*model.Project
 }
 
 func (s *service) Delete(ctx context.Context, id string) error {
+	user, err := auth.GetUser(ctx)
+	if err != nil {
+		return err
+	}
 	if err := uuid.Validate(id); err != nil {
 		return errors.ErrInvalidRequest.Wrap(err)
 	}
-	if err := s.projRepository.Delete(ctx, id); err != nil {
+	if err := s.projRepository.Delete(ctx, id, *user.ID); err != nil {
 		return err
 	}
 	return nil
