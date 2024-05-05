@@ -8,9 +8,9 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-type contextKey int
+type contextKey string
 
-const loggerKey contextKey = iota
+const loggerKey contextKey = "server.logger"
 
 var defaultLogger = zap.New(zapcore.NewCore(
 	zapcore.NewJSONEncoder(zapcore.EncoderConfig{

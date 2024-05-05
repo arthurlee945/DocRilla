@@ -46,10 +46,12 @@ func (h *Handler) GetAll(w http.ResponseWriter, r *http.Request) {
 		server.HandleServerError(r.Context(), w, err)
 		return
 	}
-	server.Encode(w, http.StatusOK, &GetAllResponse{
+	if err := server.Encode(w, http.StatusOK, &GetAllResponse{
 		projects: proj,
 		cursor:   cursor,
-	})
+	}); err != nil {
+		server.HandleServerError(r.Context(), w, err)
+	}
 }
 
 func (h *Handler) GetOverviewById(w http.ResponseWriter, r *http.Request) {
@@ -59,19 +61,53 @@ func (h *Handler) GetOverviewById(w http.ResponseWriter, r *http.Request) {
 		server.HandleServerError(r.Context(), w, err)
 		return
 	}
-	server.Encode(w, http.StatusOK, proj)
+	if err := server.Encode(w, http.StatusOK, proj); err != nil {
+		server.HandleServerError(r.Context(), w, err)
+	}
 }
 
 func (h *Handler) GetDetailById(w http.ResponseWriter, r *http.Request) {
-
+	id := r.PathValue("id")
+	proj, err := h.service.GetDetailById(r.Context(), id)
+	if err != nil {
+		server.HandleServerError(r.Context(), w, err)
+		return
+	}
+	if err := server.Encode(w, http.StatusOK, proj); err != nil {
+		server.HandleServerError(r.Context(), w, err)
+	}
 }
 
 func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
-
+	req, err := server.Decode[CreateRequest](r)
+	if err != nil {
+		server.HandleServerError(r.Context(), w, err)
+		return
+	}
+	proj, err := h.service.Create(r.Context(), req)
+	if err != nil {
+		server.HandleServerError(r.Context(), w, err)
+		return
+	}
+	if err := server.Encode(w, http.StatusCreated, proj); err != nil {
+		server.HandleServerError(r.Context(), w, err)
+	}
 }
 
 func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
-
+	req, err := server.Decode[UpdateRequest](r)
+	if err != nil {
+		server.HandleServerError(r.Context(), w, err)
+		return
+	}
+	proj, err := h.service.Update(r.Context(), req)
+	if err != nil {
+		server.HandleServerError(r.Context(), w, err)
+		return
+	}
+	if err := server.Encode(w, http.StatusAccepted, proj); err != nil {
+		server.HandleServerError(r.Context(), w, err)
+	}
 }
 
 func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {

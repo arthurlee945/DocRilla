@@ -8,6 +8,8 @@ import (
 )
 
 const (
+	ErrJSONEncoding   = Error("server_failed_encoding: server failed encoding json.")
+	ErrJSONDecoding   = Error("server_failed_decoding: server failed decoding json.")
 	ErrUnknown        = Error("err_unknwon: unknown error occured")
 	ErrInvalidRequest = Error("err_invalid_request: invalid request received")
 	ErrValidation     = Error("err_validation: failed validation")
