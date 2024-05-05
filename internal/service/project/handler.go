@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/arthurlee945/Docrilla/internal/errors"
 	"github.com/arthurlee945/Docrilla/internal/model"
 	"github.com/arthurlee945/Docrilla/internal/server"
 )
@@ -44,7 +43,7 @@ func (h *Handler) GetAll(w http.ResponseWriter, r *http.Request) {
 	}
 	proj, cursor, err := h.service.GetAll(r.Context(), GetAllRequest{limitToPass, cursor})
 	if err != nil {
-		errors.ServerHandleError(r.Context(), w, err)
+		server.HandleServerError(r.Context(), w, err)
 		return
 	}
 	server.Encode(w, http.StatusOK, &GetAllResponse{
@@ -54,8 +53,13 @@ func (h *Handler) GetAll(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetOverviewById(w http.ResponseWriter, r *http.Request) {
-	// id := r.PathValue("id")
-
+	id := r.PathValue("id")
+	proj, err := h.service.GetOverviewById(r.Context(), id)
+	if err != nil {
+		server.HandleServerError(r.Context(), w, err)
+		return
+	}
+	server.Encode(w, http.StatusOK, proj)
 }
 
 func (h *Handler) GetDetailById(w http.ResponseWriter, r *http.Request) {
