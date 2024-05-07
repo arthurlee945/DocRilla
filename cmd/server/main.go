@@ -6,11 +6,19 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
+	"sync"
+	"time"
 
 	"github.com/arthurlee945/Docrilla/internal/config"
+	"github.com/arthurlee945/Docrilla/internal/logger"
+	"github.com/arthurlee945/Docrilla/internal/server"
+	"github.com/arthurlee945/Docrilla/internal/service/field"
+	"github.com/arthurlee945/Docrilla/internal/service/project"
 	"github.com/jmoiron/sqlx"
+	"go.uber.org/zap"
 
 	"github.com/arthurlee945/Docrilla/internal/db"
 )
@@ -27,6 +35,7 @@ func main() {
 
 func run(ctx context.Context, w io.Writer, _ []string) error {
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
+	srvLogger := logger.New()
 	cfg, err := config.Load(ctx)
 	if err != nil {
 		log.Fatalln(err)
@@ -36,19 +45,43 @@ func run(ctx context.Context, w io.Writer, _ []string) error {
 		log.Fatalln(err)
 	}
 	defer func() {
-		dbConn.Close()
+		if err := dbConn.Close(); err != nil {
+			srvLogger.Error("db close error", zap.Error(err))
+		}
 		cancel()
 	}()
-	if err := devtool(dbConn); err != nil {
-		return err
-	}
 	// Might not need this
-	http := flag.String("http", ":8080", "HTTP service address (e.g.. '127.0.0.1:8080' or ':8080')")
+	addr := flag.String("http", ":8080", "HTTP service address (e.g.. '127.0.0.1:8080' or ':8080')")
 	flag.Parse()
 
-	//TODO: add server here
+	// proj
+	projService := project.NewService(project.NewRepository(dbConn), field.NewRepository(dbConn))
 
-	fmt.Fprintln(w, "Listening on "+httpLink(*http, false))
+	srv := server.New(ctx, projService)
+	httpServer := http.Server{
+		Addr:    *addr,
+		Handler: srv,
+	}
+	go func() {
+		fmt.Fprintln(w, "Listening on "+httpLink(*addr, false))
+		if err := httpServer.ListenAndServe(); err != nil && err == http.ErrServerClosed {
+			srvLogger.Error("ListenAndServe failed", zap.Error(err))
+			os.Exit(1)
+		}
+	}()
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		<-ctx.Done()
+
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		if err := httpServer.Shutdown(shutdownCtx); err != nil {
+			srvLogger.Error("failed shutting down gracefully", zap.Error(err))
+		}
+	}()
+	wg.Wait()
 	return nil
 }
 

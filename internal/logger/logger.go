@@ -10,7 +10,7 @@ import (
 
 type contextKey string
 
-const loggerKey contextKey = "server.logger"
+const LoggerKey contextKey = "server.logger"
 
 var defaultLogger = zap.New(zapcore.NewCore(
 	zapcore.NewJSONEncoder(zapcore.EncoderConfig{
@@ -39,14 +39,14 @@ func New() *Logger {
 }
 
 func From(ctx context.Context) *Logger {
-	if l, ok := ctx.Value(loggerKey).(*Logger); ok {
+	if l, ok := ctx.Value(LoggerKey).(*Logger); ok {
 		return l
 	}
 	return &Logger{*defaultLogger}
 }
 
 func With(ctx context.Context, l *Logger) context.Context {
-	return context.WithValue(ctx, loggerKey, l)
+	return context.WithValue(ctx, LoggerKey, l)
 }
 
 func WithFields(ctx context.Context, fields ...zap.Field) context.Context {

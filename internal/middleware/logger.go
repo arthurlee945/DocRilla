@@ -1,8 +1,8 @@
 package middleware
 
 import (
+	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"time"
 
@@ -25,11 +25,11 @@ func Logger(next http.Handler) http.Handler {
 		start := time.Now()
 
 		wrapped := &wrapperWriter{w, http.StatusOK}
+		servLogger := logger.New()
+		loggedReq := r.WithContext(context.WithValue(r.Context(), logger.LoggerKey, servLogger))
+		next.ServeHTTP(wrapped, loggedReq)
 
-		next.ServeHTTP(wrapped, r)
-
-		log.Println(wrapped.statusCode, r.Method, r.URL.Path, time.Since(start))
-		logger.New().Info(
+		servLogger.Info(
 			fmt.Sprintf("%s %s", r.Method, r.URL.Path),
 			zap.Int("statusCode", wrapped.statusCode),
 			zap.String("duration", time.Since(start).String()),
