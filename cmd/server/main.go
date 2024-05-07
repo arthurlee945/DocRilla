@@ -51,7 +51,7 @@ func run(ctx context.Context, w io.Writer, _ []string) error {
 		cancel()
 	}()
 	// Might not need this
-	addr := flag.String("http", ":8080", "HTTP service address (e.g.. '127.0.0.1:8080' or ':8080')")
+	addr := flag.String("http", fmt.Sprintf(":%s", cfg.Port), "HTTP service address (e.g.. '127.0.0.1:8080' or ':8080')")
 	flag.Parse()
 
 	// proj

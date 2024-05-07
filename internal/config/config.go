@@ -3,6 +3,7 @@ package config
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/arthurlee945/Docrilla/internal/errors"
@@ -24,7 +25,8 @@ const (
 const configPath = "config/%s.config.yaml"
 
 type Config struct {
-	DSN string `yaml:"dsn"`
+	DSN  string `yaml:"dsn"`
+	Port string `yaml:"port"`
 }
 
 func Load(ctx context.Context) (*Config, error) {
@@ -48,7 +50,7 @@ func loadEnvironment(ctx context.Context, cfg interface{}) error {
 	}
 	path := fmt.Sprintf("%s/%s", wd, fmt.Sprintf(configPath, getAppEnv()))
 
-	logger.From(ctx).Info("Loading Configuration", zap.String("path", path))
+	log.Println("Loading Configuration...")
 
 	data, err := os.ReadFile(path)
 	if err != nil {

@@ -29,8 +29,8 @@ func NewHandler(s Service) *Handler {
 }
 
 type GetAllResponse struct {
-	projects []model.Project
-	cursor   string
+	Projects []model.Project `json:"projects"`
+	Cursor   string          `json:"cursor"`
 }
 
 func (h *Handler) GetAll(w http.ResponseWriter, r *http.Request) {
@@ -41,14 +41,15 @@ func (h *Handler) GetAll(w http.ResponseWriter, r *http.Request) {
 	} else {
 		limitToPass = 10
 	}
-	proj, cursor, err := h.service.GetAll(r.Context(), GetAllRequest{limitToPass, cursor})
+	projs, cursor, err := h.service.GetAll(r.Context(), GetAllRequest{limitToPass, cursor})
+
 	if err != nil {
 		util.HandleServerError(r.Context(), w, err)
 		return
 	}
-	if err := util.Encode(w, http.StatusOK, &GetAllResponse{
-		projects: proj,
-		cursor:   cursor,
+	if err := util.Encode(w, http.StatusOK, GetAllResponse{
+		Projects: projs,
+		Cursor:   cursor,
 	}); err != nil {
 		util.HandleServerError(r.Context(), w, err)
 	}
