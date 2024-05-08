@@ -15,18 +15,18 @@ type wrapperWriter struct {
 	statusCode int
 }
 
-func (ww *wrapperWriter) WriterHeader(statusCode int) {
-	ww.ResponseWriter.WriteHeader(statusCode)
+func (ww *wrapperWriter) WriteHeader(statusCode int) {
 	ww.statusCode = statusCode
+	ww.ResponseWriter.WriteHeader(statusCode)
 }
 
 func Logger(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
-
-		wrapped := &wrapperWriter{w, http.StatusOK}
 		servLogger := logger.New()
+		wrapped := &wrapperWriter{ResponseWriter: w, statusCode: http.StatusOK}
 		loggedReq := r.WithContext(context.WithValue(r.Context(), logger.LoggerKey, servLogger))
+
 		next.ServeHTTP(wrapped, loggedReq)
 
 		servLogger.Info(

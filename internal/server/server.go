@@ -10,12 +10,12 @@ import (
 
 // https://grafana.com/blog/2024/02/09/how-i-write-http-services-in-go-after-13-years/
 func New(ctx context.Context, projectService project.Service) http.Handler {
-	middlewareStack := middleware.CreateStack(middleware.Logger)
+	stack := middleware.CreateStack(middleware.Logger)
 
 	router, protectedRouter := http.NewServeMux(), http.NewServeMux()
-	router.Handle("/", middleware.Auth(protectedRouter))
-
 	registerRoutes(router, protectedRouter, projectService)
 
-	return middlewareStack(router)
+	router.Handle("/", middleware.Auth(protectedRouter))
+
+	return stack(router)
 }

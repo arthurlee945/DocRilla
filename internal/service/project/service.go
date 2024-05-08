@@ -68,6 +68,7 @@ func (s *service) GetOverviewById(ctx context.Context, id string) (*model.Projec
 
 func (s *service) GetDetailById(ctx context.Context, id string) (*model.Project, error) {
 	user, err := auth.GetUser(ctx)
+
 	if err != nil {
 		return nil, err
 	}
@@ -82,11 +83,11 @@ func (s *service) GetDetailById(ctx context.Context, id string) (*model.Project,
 }
 
 type CreateRequest struct {
-	Title       string `validate:"required"`
-	Description *string
-	Route       *string
-	Token       *string
-	DocumentUrl string `validate:"required"`
+	Title       string  `json:"title" validate:"required"`
+	Description *string `json:"desciption"`
+	Route       *string `json:"route"`
+	Token       *string `json:"token"`
+	DocumentUrl string  `json:"documentUrl" validate:"required"`
 }
 
 func (s *service) Create(ctx context.Context, req CreateRequest) (*model.Project, error) {

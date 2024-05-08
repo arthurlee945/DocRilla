@@ -42,7 +42,9 @@ func HandleServerError(ctx context.Context, w http.ResponseWriter, err error) {
 	case errors.Is(err, errors.ErrUnauthorized):
 		w.WriteHeader(http.StatusUnauthorized)
 	case errors.Is(err, errors.ErrJSONEncoding):
+		fallthrough
 	case errors.Is(err, errors.ErrJSONDecoding):
+		fallthrough
 	default:
 		w.WriteHeader(http.StatusInternalServerError)
 	}

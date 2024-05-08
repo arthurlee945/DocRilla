@@ -57,6 +57,7 @@ func (h *Handler) GetAll(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) GetOverviewById(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
+
 	proj, err := h.service.GetOverviewById(r.Context(), id)
 	if err != nil {
 		util.HandleServerError(r.Context(), w, err)
