@@ -8,6 +8,10 @@ import (
 	"github.com/arthurlee945/Docrilla/internal/service/project"
 )
 
+type Test struct {
+	Test string `json:"test"`
+}
+
 // https://grafana.com/blog/2024/02/09/how-i-write-http-services-in-go-after-13-years/
 func New(ctx context.Context, projectService project.Service) http.Handler {
 	stack := middleware.CreateStack(middleware.Logger)

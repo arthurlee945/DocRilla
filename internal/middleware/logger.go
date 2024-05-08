@@ -24,7 +24,7 @@ func Logger(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 		servLogger := logger.New()
-		wrapped := &wrapperWriter{ResponseWriter: w, statusCode: http.StatusOK}
+		wrapped := &wrapperWriter{w, http.StatusOK}
 		loggedReq := r.WithContext(context.WithValue(r.Context(), logger.LoggerKey, servLogger))
 
 		next.ServeHTTP(wrapped, loggedReq)
