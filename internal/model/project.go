@@ -5,7 +5,7 @@ import (
 )
 
 type Project struct {
-	ID          *uint64    `json:"id" db:"id"`
+	ID          *uint64    `json:"-" db:"id"`
 	UUID        *string    `json:"uuid" db:"uuid"`
 	UserID      *uint64    `json:"userID" db:"user_id"`
 	Route       *string    `json:"route" db:"route"`

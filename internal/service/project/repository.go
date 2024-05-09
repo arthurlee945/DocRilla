@@ -49,6 +49,7 @@ func (r *repository) GetAll(ctx context.Context, limit uint8, cursor string, use
 		return nil, "", errors.RepoError(err)
 	}
 	var nextCursor string
+
 	if len(projects) == int(limit) {
 		nextCursor = EncodeCursor(*projects[len(projects)-1].CreatedAt)
 	}

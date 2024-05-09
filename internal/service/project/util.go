@@ -3,6 +3,8 @@ package project
 import (
 	"encoding/base64"
 	"time"
+
+	"github.com/arthurlee945/Docrilla/internal/errors"
 )
 
 const (
@@ -13,7 +15,7 @@ const (
 func DecodeCursor(encodedTime string) (time.Time, error) {
 	byts, err := base64.StdEncoding.DecodeString(encodedTime)
 	if err != nil {
-		return time.Time{}, err
+		return time.Time{}, errors.ErrDecodeCursor.Wrap(err)
 	}
 	return time.Parse(timeFormat, string(byts))
 }

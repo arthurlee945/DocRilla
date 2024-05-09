@@ -19,12 +19,11 @@ func Encode[T any](w http.ResponseWriter, status int, v T) error {
 	return nil
 }
 
-func Decode[T any](r *http.Request) (T, error) {
-	var v T
+func Decode(r *http.Request, v interface{}) error {
 	if err := json.NewDecoder(r.Body).Decode(v); err != nil {
-		return v, errors.ErrJSONDecoding.Wrap(err)
+		return errors.ErrJSONDecoding.Wrap(err)
 	}
-	return v, nil
+	return nil
 }
 
 func HandleServerError(ctx context.Context, w http.ResponseWriter, err error) {

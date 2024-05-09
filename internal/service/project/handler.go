@@ -81,12 +81,12 @@ func (h *Handler) GetDetailById(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
-	req, err := util.Decode[CreateRequest](r)
-	if err != nil {
+	reqObj := &CreateRequest{}
+	if err := util.Decode(r, reqObj); err != nil {
 		util.HandleServerError(r.Context(), w, err)
 		return
 	}
-	proj, err := h.service.Create(r.Context(), req)
+	proj, err := h.service.Create(r.Context(), *reqObj)
 	if err != nil {
 		util.HandleServerError(r.Context(), w, err)
 		return
@@ -97,12 +97,12 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
-	req, err := util.Decode[UpdateRequest](r)
-	if err != nil {
+	reqObj := &UpdateRequest{}
+	if err := util.Decode(r, reqObj); err != nil {
 		util.HandleServerError(r.Context(), w, err)
 		return
 	}
-	proj, err := h.service.Update(r.Context(), req)
+	proj, err := h.service.Update(r.Context(), *reqObj)
 	if err != nil {
 		util.HandleServerError(r.Context(), w, err)
 		return

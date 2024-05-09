@@ -11,6 +11,7 @@ const (
 	ErrUnauthorized   = Error("err_unauthorized: not authenticated")
 	ErrJSONEncoding   = Error("err_failed_encoding: server failed encoding json.")
 	ErrJSONDecoding   = Error("err_failed_decoding: server failed decoding json.")
+	ErrDecodeCursor   = Error("err_decode_cursor: server failed to decode cursor provided")
 	ErrUnknown        = Error("err_unknwon: unknown error occured")
 	ErrInvalidRequest = Error("err_invalid_request: invalid request received")
 	ErrValidation     = Error("err_validation: failed validation")

@@ -3,7 +3,7 @@ package model
 import "time"
 
 type Submission struct {
-	ID              *uint64    `json:"id" db:"id"`
+	ID              *uint64    `json:"-" db:"id"`
 	UUID            *string    `json:"uuid" db:"uuid"`
 	ProjectID       *string    `json:"projectID" db:"project_id"`
 	SubmittedAt     *time.Time `json:"submittedAt" db:"submitted_at"`
@@ -12,7 +12,7 @@ type Submission struct {
 }
 
 type SubmittedField struct {
-	ID           *uint64 `json:"id" db:"id"`
+	ID           *uint64 `json:"-" db:"id"`
 	FieldID      *string `json:"fieldID" db:"field_id"`
 	SubmissionID *string `json:"submissionID" db:"submission_id"`
 	Value        *byte   `json:"value" db:"value"`
