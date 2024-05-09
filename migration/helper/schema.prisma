@@ -50,6 +50,8 @@ model usr {
   accounts                 account[]
   sessions                 session[]
   projects                 project[]
+
+  @@index([email, password])
 }
 
 model session {

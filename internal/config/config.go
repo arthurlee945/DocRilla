@@ -25,8 +25,9 @@ const (
 const configPath = "config/%s.config.yaml"
 
 type Config struct {
-	DSN  string `yaml:"dsn"`
-	Port string `yaml:"port"`
+	DSN       string `yaml:"dsn"`
+	Port      string `yaml:"port"`
+	JwtSecret string `yaml:"jwtSecret"`
 }
 
 func Load(ctx context.Context) (*Config, error) {

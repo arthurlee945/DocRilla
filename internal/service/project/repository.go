@@ -89,7 +89,7 @@ func (r *repository) Create(ctx context.Context, proj *model.Project) (*model.Pr
 	}
 	defer rows.Close()
 	if !rows.Next() {
-		return nil, errors.ErrNotFound
+		return nil, errors.ErrUnknown
 	}
 	newProj := new(model.Project)
 	if err := rows.StructScan(newProj); err != nil {

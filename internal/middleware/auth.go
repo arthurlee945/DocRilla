@@ -10,7 +10,7 @@ import (
 
 func Auth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		authReq := r.WithContext(context.WithValue(r.Context(), auth.AuthKey, &mock.User))
+		authReq := r.WithContext(context.WithValue(r.Context(), auth.AuthKey, *mock.User.ID))
 		next.ServeHTTP(w, authReq)
 	})
 }

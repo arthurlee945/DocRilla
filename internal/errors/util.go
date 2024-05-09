@@ -17,3 +17,17 @@ func RepoError(err error) error {
 		return ErrUnknown.Wrap(err)
 	}
 }
+
+func AuthError(err error) error {
+	if err == nil {
+		return nil
+	}
+	switch {
+	case Is(err, sql.ErrNoRows):
+		fallthrough
+	case Is(err, sql.ErrNoRows):
+		return ErrUnauthorized
+	default:
+		return ErrUnknown.Wrap(err)
+	}
+}

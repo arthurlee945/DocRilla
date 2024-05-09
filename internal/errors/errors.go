@@ -14,6 +14,7 @@ const (
 	ErrDecodeCursor   = Error("err_decode_cursor: server failed to decode cursor provided")
 	ErrUnknown        = Error("err_unknwon: unknown error occured")
 	ErrInvalidRequest = Error("err_invalid_request: invalid request received")
+	ErrInvalidToken   = Error("err_invalid_token: invalid token")
 	ErrValidation     = Error("err_validation: failed validation")
 	ErrNotFound       = Error("err_not_found: not found")
 )

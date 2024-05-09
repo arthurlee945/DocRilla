@@ -29,7 +29,7 @@ CREATE TABLE "usr" (
     "email" TEXT NOT NULL,
     "email_verified" BOOLEAN DEFAULT false,
     "email_verification_token" TEXT,
-    "password" TEXT,
+    "password" TEXT NOT NULL,
     "role" "user_role" NOT NULL DEFAULT 'USER',
     "password_changed_at" TIMESTAMP(3),
     "reset_password_token" TEXT,
@@ -116,6 +116,9 @@ CREATE UNIQUE INDEX "account_provider_provider_account_id_key" ON "account"("pro
 
 -- CreateIndex
 CREATE UNIQUE INDEX "usr_email_key" ON "usr"("email");
+
+-- CreateIndex
+CREATE INDEX "usr_email_password_idx" ON "usr"("email", "password");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "session_session_token_key" ON "session"("session_token");

@@ -40,11 +40,11 @@ type GetAllRequest struct {
 }
 
 func (s *service) GetAll(ctx context.Context, req GetAllRequest) ([]model.Project, string, error) {
-	user, err := auth.GetUser(ctx)
+	userId, err := auth.GetUser(ctx)
 	if err != nil {
 		return nil, "", err
 	}
-	projects, nextCursor, err := s.projRepository.GetAll(ctx, req.Limit, req.Cursor, *user.ID)
+	projects, nextCursor, err := s.projRepository.GetAll(ctx, req.Limit, req.Cursor, userId)
 	if err != nil {
 		return nil, "", err
 	}
@@ -52,14 +52,14 @@ func (s *service) GetAll(ctx context.Context, req GetAllRequest) ([]model.Projec
 }
 
 func (s *service) GetOverviewById(ctx context.Context, id string) (*model.Project, error) {
-	user, err := auth.GetUser(ctx)
+	userId, err := auth.GetUser(ctx)
 	if err != nil {
 		return nil, err
 	}
 	if err := uuid.Validate(id); err != nil {
 		return nil, errors.ErrInvalidRequest.Wrap(err)
 	}
-	project, err := s.projRepository.GetOverviewById(ctx, id, *user.ID)
+	project, err := s.projRepository.GetOverviewById(ctx, id, userId)
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +67,7 @@ func (s *service) GetOverviewById(ctx context.Context, id string) (*model.Projec
 }
 
 func (s *service) GetDetailById(ctx context.Context, id string) (*model.Project, error) {
-	user, err := auth.GetUser(ctx)
+	userId, err := auth.GetUser(ctx)
 
 	if err != nil {
 		return nil, err
@@ -75,7 +75,7 @@ func (s *service) GetDetailById(ctx context.Context, id string) (*model.Project,
 	if err := uuid.Validate(id); err != nil {
 		return nil, errors.ErrInvalidRequest.Wrap(err)
 	}
-	project, err := s.projRepository.GetDetailById(ctx, id, *user.ID)
+	project, err := s.projRepository.GetDetailById(ctx, id, userId)
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +91,7 @@ type CreateRequest struct {
 }
 
 func (s *service) Create(ctx context.Context, req CreateRequest) (*model.Project, error) {
-	user, err := auth.GetUser(ctx)
+	userId, err := auth.GetUser(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -104,7 +104,7 @@ func (s *service) Create(ctx context.Context, req CreateRequest) (*model.Project
 	}
 
 	createdProj, err := s.projRepository.Create(ctx, &model.Project{
-		UserID:      user.ID,
+		UserID:      &userId,
 		Title:       util.ToPointer(req.Title),
 		Description: req.Description,
 		Route:       req.Route,
@@ -130,7 +130,7 @@ type UpdateRequest struct {
 
 // ADD Field repo and update this
 func (s *service) Update(ctx context.Context, req UpdateRequest) (*model.Project, error) {
-	user, err := auth.GetUser(ctx)
+	userId, err := auth.GetUser(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -153,7 +153,7 @@ func (s *service) Update(ctx context.Context, req UpdateRequest) (*model.Project
 		go func() {
 			defer wg.Done()
 			updatedProj, err := s.projRepository.Update(uCtx, &model.Project{
-				UserID:      user.ID,
+				UserID:      &userId,
 				UUID:        util.ToPointer(req.UUID),
 				Title:       req.Title,
 				Description: req.Description,
@@ -202,14 +202,14 @@ func (s *service) Update(ctx context.Context, req UpdateRequest) (*model.Project
 }
 
 func (s *service) Delete(ctx context.Context, id string) error {
-	user, err := auth.GetUser(ctx)
+	userId, err := auth.GetUser(ctx)
 	if err != nil {
 		return err
 	}
 	if err := uuid.Validate(id); err != nil {
 		return errors.ErrInvalidRequest.Wrap(err)
 	}
-	if err := s.projRepository.Delete(ctx, id, *user.ID); err != nil {
+	if err := s.projRepository.Delete(ctx, id, userId); err != nil {
 		return err
 	}
 	return nil

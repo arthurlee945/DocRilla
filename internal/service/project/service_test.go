@@ -162,5 +162,5 @@ func servicePrep(t *testing.T) (*sqlx.DB, project.Service, context.Context) {
 		t.Fatalf("Failed to initialize Test DB connection err=%+v", err)
 	}
 
-	return db, project.NewService(project.NewRepository(db), field.NewRepository(db)), context.WithValue(ctx, auth.AuthKey, &mock.User)
+	return db, project.NewService(project.NewRepository(db), field.NewRepository(db)), context.WithValue(ctx, auth.AuthKey, *mock.User.ID)
 }

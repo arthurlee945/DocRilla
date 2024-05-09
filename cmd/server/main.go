@@ -57,7 +57,7 @@ func run(ctx context.Context, w io.Writer, _ []string) error {
 	// proj
 	projService := project.NewService(project.NewRepository(dbConn), field.NewRepository(dbConn))
 
-	srv := server.New(ctx, projService)
+	srv := server.New(ctx, cfg, projService)
 	httpServer := http.Server{
 		Addr:    *addr,
 		Handler: srv,
