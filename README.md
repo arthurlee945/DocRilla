@@ -20,7 +20,7 @@
 
 ## Overview
 
-This package contains api endpoint (project uuid) to be used for document generation.
+SAMPLE CRUD APP FOR REFERENCE
 
 **Run below for local instance**
 
