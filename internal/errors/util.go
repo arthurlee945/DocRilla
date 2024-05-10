@@ -23,9 +23,7 @@ func AuthError(err error) error {
 		return nil
 	}
 	switch {
-	case Is(err, sql.ErrNoRows):
-		fallthrough
-	case Is(err, sql.ErrNoRows):
+	case Is(err, sql.ErrNoRows) || Is(err, ErrInvalidToken) || Is(err, ErrUnauthorized):
 		return ErrUnauthorized
 	default:
 		return ErrUnknown.Wrap(err)

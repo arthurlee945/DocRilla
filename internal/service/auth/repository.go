@@ -9,7 +9,8 @@ import (
 )
 
 type Repository interface {
-	Get(ctx context.Context, email, password string) (*model.User, error)
+	GetById(ctx context.Context, id uint64) (*model.User, error)
+	GetByEmail(ctx context.Context, email string) (*model.User, error)
 	Create(ctx context.Context, user *model.User) (*model.User, error)
 	Update(ctx context.Context, user *model.User) (*model.User, error)
 	Delete(ctx context.Context, user *model.User) error
@@ -23,43 +24,43 @@ func NewRepository(db *sqlx.DB) Repository {
 	return &repository{db}
 }
 
-func (r *repository) Get(ctx context.Context, email, password string) (*model.User, error) {
+func (r *repository) GetByEmail(ctx context.Context, email string) (*model.User, error) {
 	user := new(model.User)
-	if err := r.db.GetContext(ctx, user, `SELECT * FROM user WHERE email=$1 AND password=$2`, email, password); err != nil {
-		return nil, errors.RepoError(err)
+	if err := r.db.GetContext(ctx, user, `SELECT * FROM usr WHERE email=$1`, email); err != nil {
+		return nil, err
 	}
 	return user, nil
 }
 
 func (r *repository) GetById(ctx context.Context, id uint64) (*model.User, error) {
 	user := new(model.User)
-	if err := r.db.GetContext(ctx, user, `SELECT * FROM user WHERE id=$1`, id); err != nil {
-		return nil, errors.RepoError(err)
+	if err := r.db.GetContext(ctx, user, `SELECT * FROM usr WHERE id=$1`, id); err != nil {
+		return nil, err
 	}
 	return user, nil
 }
 
 func (r *repository) Create(ctx context.Context, user *model.User) (*model.User, error) {
 	rows, err := r.db.NamedQueryContext(ctx, `
-	INSERT INTO user (name, email, password)
+	INSERT INTO usr (name, email, password)
 	VALUES (:name, :email, :password) RETURNING *
 	`, user)
 	if err != nil {
-		return nil, errors.RepoError(err)
+		return nil, err
 	}
 	if !rows.Next() {
 		return nil, errors.ErrUnknown
 	}
 	newUser := new(model.User)
-	if err := rows.Scan(newUser); err != nil {
-		return nil, errors.RepoError(err)
+	if err := rows.StructScan(newUser); err != nil {
+		return nil, err
 	}
 	return newUser, nil
 }
 
 func (r *repository) Update(ctx context.Context, user *model.User) (*model.User, error) {
 	rows, err := r.db.NamedQueryContext(ctx, `
-	UPDATE user
+	UPDATE usr
 	SET
 	name = COALESCE(:name, name),
 	email = COALESCE(:email, email),
@@ -74,21 +75,21 @@ func (r *repository) Update(ctx context.Context, user *model.User) (*model.User,
 	WHERE user_id = :user_id RETURNING *
 	`, user)
 	if err != nil {
-		return nil, errors.RepoError(err)
+		return nil, err
 	}
 	if !rows.Next() {
 		return nil, errors.ErrUnknown
 	}
 	updatedUser := new(model.User)
 	if err := rows.StructScan(updatedUser); err != nil {
-		return nil, errors.RepoError(err)
+		return nil, err
 	}
 	return updatedUser, nil
 }
 
 func (r *repository) Delete(ctx context.Context, user *model.User) error {
-	if _, err := r.db.NamedExecContext(ctx, `DELETE FROM user WHERE user_id=:user_id`, user); err != nil {
-		return errors.RepoError(err)
+	if _, err := r.db.NamedExecContext(ctx, `DELETE FROM usr WHERE id=:id`, user); err != nil {
+		return err
 	}
 	return nil
 }

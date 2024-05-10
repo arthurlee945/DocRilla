@@ -12,7 +12,7 @@ var (
 		ID:       util.ToPointer[uint64](1),
 		Name:     util.ToPointer("admin"),
 		Email:    util.ToPointer("admin@admin.com"),
-		Password: util.ToPointer("qwer1234"),
+		Password: util.ToPointer("$2a$14$Up0V3zSFmLCtuYMrVnwbSOi/Z76dAja6ZqTU22akvbNYZQFVBmn7G"), //qwer1234
 		Role:     util.ToPointer(user.MOCK),
 	}
 

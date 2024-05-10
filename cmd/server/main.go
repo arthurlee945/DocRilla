@@ -15,6 +15,7 @@ import (
 	"github.com/arthurlee945/Docrilla/internal/config"
 	"github.com/arthurlee945/Docrilla/internal/logger"
 	"github.com/arthurlee945/Docrilla/internal/server"
+	"github.com/arthurlee945/Docrilla/internal/service/auth"
 	"github.com/arthurlee945/Docrilla/internal/service/field"
 	"github.com/arthurlee945/Docrilla/internal/service/project"
 	"github.com/jmoiron/sqlx"
@@ -55,9 +56,9 @@ func run(ctx context.Context, w io.Writer, _ []string) error {
 	flag.Parse()
 
 	// proj
+	authService := auth.NewService(cfg, auth.NewRepository(dbConn))
 	projService := project.NewService(project.NewRepository(dbConn), field.NewRepository(dbConn))
-
-	srv := server.New(ctx, cfg, projService)
+	srv := server.New(ctx, cfg, authService, projService)
 	httpServer := http.Server{
 		Addr:    *addr,
 		Handler: srv,
