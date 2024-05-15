@@ -7,7 +7,7 @@ import (
 	"github.com/arthurlee945/Docrilla/internal/errors"
 	"github.com/arthurlee945/Docrilla/internal/model"
 	fieldEnum "github.com/arthurlee945/Docrilla/internal/model/enum/field"
-	"github.com/arthurlee945/Docrilla/internal/util"
+	"github.com/arthurlee945/Docrilla/internal/util/ptr"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 )
@@ -58,13 +58,13 @@ func (s *service) Create(ctx context.Context, req CreateRequest) (*model.Field, 
 		return nil, errors.ErrInvalidRequest.Wrap(err)
 	}
 	field, err := s.repo.Create(ctx, &model.Field{
-		ProjectID: util.ToPointer(req.ProjectId),
-		X:         util.ToPointer(req.X),
-		Y:         util.ToPointer(req.Y),
-		Width:     util.ToPointer(req.Width),
-		Height:    util.ToPointer(req.Height),
-		Page:      util.ToPointer(req.Page),
-		Type:      util.ToPointer(req.Type),
+		ProjectID: ptr.ToPointer(req.ProjectId),
+		X:         ptr.ToPointer(req.X),
+		Y:         ptr.ToPointer(req.Y),
+		Width:     ptr.ToPointer(req.Width),
+		Height:    ptr.ToPointer(req.Height),
+		Page:      ptr.ToPointer(req.Page),
+		Type:      ptr.ToPointer(req.Type),
 	})
 	if err != nil {
 		return nil, err

@@ -3,7 +3,8 @@ package auth
 import (
 	"net/http"
 
-	"github.com/arthurlee945/Docrilla/internal/util"
+	"github.com/arthurlee945/Docrilla/internal/errors"
+	"github.com/arthurlee945/Docrilla/internal/util/json"
 )
 
 func RegisterHandler(publicRouter *http.ServeMux, protectedRouter *http.ServeMux, service Service) {
@@ -24,45 +25,45 @@ func NewHandler(s Service) *Handler {
 
 func (h *Handler) LogIn(w http.ResponseWriter, r *http.Request) {
 	loginReq := new(LogInReq)
-	if err := util.Decode(r, loginReq); err != nil {
-		util.HandleServerError(r.Context(), w, err)
+	if err := json.Decode(r, loginReq); err != nil {
+		errors.ServerError(r.Context(), w, err)
 		return
 	}
 	jwt, err := h.service.LogIn(r.Context(), *loginReq)
 	if err != nil {
-		util.HandleServerError(r.Context(), w, err)
+		errors.ServerError(r.Context(), w, err)
 		return
 	}
-	if err := util.Encode(w, http.StatusOK, struct {
+	if err := json.Encode(w, http.StatusOK, struct {
 		Token string `json:"token"`
 	}{jwt}); err != nil {
-		util.HandleServerError(r.Context(), w, err)
+		errors.ServerError(r.Context(), w, err)
 	}
 }
 
 func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 	signupReq := new(SignUpRequest)
-	if err := util.Decode(r, signupReq); err != nil {
-		util.HandleServerError(r.Context(), w, err)
+	if err := json.Decode(r, signupReq); err != nil {
+		errors.ServerError(r.Context(), w, err)
 		return
 	}
 	jwt, err := h.service.SignUp(r.Context(), *signupReq)
 	if err != nil {
-		util.HandleServerError(r.Context(), w, err)
+		errors.ServerError(r.Context(), w, err)
 		return
 	}
-	if err := util.Encode(w, http.StatusOK, struct {
+	if err := json.Encode(w, http.StatusOK, struct {
 		Token string `json:"token"`
 	}{jwt}); err != nil {
-		util.HandleServerError(r.Context(), w, err)
+		errors.ServerError(r.Context(), w, err)
 	}
 }
 func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 	if err := h.service.Delete(r.Context()); err != nil {
-		util.HandleServerError(r.Context(), w, err)
+		errors.ServerError(r.Context(), w, err)
 		return
 	}
-	if err := util.Encode(w, http.StatusAccepted, struct{}{}); err != nil {
-		util.HandleServerError(r.Context(), w, err)
+	if err := json.Encode(w, http.StatusAccepted, struct{}{}); err != nil {
+		errors.ServerError(r.Context(), w, err)
 	}
 }

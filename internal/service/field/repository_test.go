@@ -8,7 +8,7 @@ import (
 	fieldEnum "github.com/arthurlee945/Docrilla/internal/model/enum/field"
 	"github.com/arthurlee945/Docrilla/internal/model/mock"
 	"github.com/arthurlee945/Docrilla/internal/service/field"
-	"github.com/arthurlee945/Docrilla/internal/util"
+	"github.com/arthurlee945/Docrilla/internal/util/ptr"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 )
@@ -50,12 +50,12 @@ func TestFieldRepository_CreateUpdateDeleteProject(t *testing.T) {
 
 	mockField := &model.Field{
 		ProjectID: mock.Project.UUID,
-		X:         util.ToPointer(x),
-		Y:         util.ToPointer(y),
-		Width:     util.ToPointer(width),
-		Height:    util.ToPointer(height),
-		Page:      util.ToPointer[uint32](2),
-		Type:      util.ToPointer(uType),
+		X:         ptr.ToPointer(x),
+		Y:         ptr.ToPointer(y),
+		Width:     ptr.ToPointer(width),
+		Height:    ptr.ToPointer(height),
+		Page:      ptr.ToPointer[uint32](2),
+		Type:      ptr.ToPointer(uType),
 	}
 	//CREATE
 	newField, err := repo.Create(ctx, mockField)
@@ -69,10 +69,10 @@ func TestFieldRepository_CreateUpdateDeleteProject(t *testing.T) {
 	// UPDATE
 
 	newPos := [4]float64{1, 2, 3, 4}
-	newField.X = util.ToPointer(newPos[0])
-	newField.Y = util.ToPointer(newPos[1])
-	newField.Width = util.ToPointer(newPos[2])
-	newField.Height = util.ToPointer(newPos[3])
+	newField.X = ptr.ToPointer(newPos[0])
+	newField.Y = ptr.ToPointer(newPos[1])
+	newField.Width = ptr.ToPointer(newPos[2])
+	newField.Height = ptr.ToPointer(newPos[3])
 
 	updatedField, err := repo.Update(ctx, newField)
 	if err != nil {

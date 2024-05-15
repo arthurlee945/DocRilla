@@ -4,8 +4,9 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/arthurlee945/Docrilla/internal/errors"
 	"github.com/arthurlee945/Docrilla/internal/model"
-	"github.com/arthurlee945/Docrilla/internal/util"
+	"github.com/arthurlee945/Docrilla/internal/util/json"
 )
 
 func RegisterHandler(router *http.ServeMux, service Service) {
@@ -44,14 +45,14 @@ func (h *Handler) GetAll(w http.ResponseWriter, r *http.Request) {
 	projs, cursor, err := h.service.GetAll(r.Context(), GetAllRequest{limitToPass, cursor})
 
 	if err != nil {
-		util.HandleServerError(r.Context(), w, err)
+		errors.ServerError(r.Context(), w, err)
 		return
 	}
-	if err := util.Encode(w, http.StatusOK, GetAllResponse{
+	if err := json.Encode(w, http.StatusOK, GetAllResponse{
 		Projects: projs,
 		Cursor:   cursor,
 	}); err != nil {
-		util.HandleServerError(r.Context(), w, err)
+		errors.ServerError(r.Context(), w, err)
 	}
 }
 
@@ -60,11 +61,11 @@ func (h *Handler) GetOverviewById(w http.ResponseWriter, r *http.Request) {
 
 	proj, err := h.service.GetOverviewById(r.Context(), id)
 	if err != nil {
-		util.HandleServerError(r.Context(), w, err)
+		errors.ServerError(r.Context(), w, err)
 		return
 	}
-	if err := util.Encode(w, http.StatusOK, proj); err != nil {
-		util.HandleServerError(r.Context(), w, err)
+	if err := json.Encode(w, http.StatusOK, proj); err != nil {
+		errors.ServerError(r.Context(), w, err)
 	}
 }
 
@@ -72,43 +73,43 @@ func (h *Handler) GetDetailById(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	proj, err := h.service.GetDetailById(r.Context(), id)
 	if err != nil {
-		util.HandleServerError(r.Context(), w, err)
+		errors.ServerError(r.Context(), w, err)
 		return
 	}
-	if err := util.Encode(w, http.StatusOK, proj); err != nil {
-		util.HandleServerError(r.Context(), w, err)
+	if err := json.Encode(w, http.StatusOK, proj); err != nil {
+		errors.ServerError(r.Context(), w, err)
 	}
 }
 
 func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 	reqObj := &CreateRequest{}
-	if err := util.Decode(r, reqObj); err != nil {
-		util.HandleServerError(r.Context(), w, err)
+	if err := json.Decode(r, reqObj); err != nil {
+		errors.ServerError(r.Context(), w, err)
 		return
 	}
 	proj, err := h.service.Create(r.Context(), *reqObj)
 	if err != nil {
-		util.HandleServerError(r.Context(), w, err)
+		errors.ServerError(r.Context(), w, err)
 		return
 	}
-	if err := util.Encode(w, http.StatusCreated, proj); err != nil {
-		util.HandleServerError(r.Context(), w, err)
+	if err := json.Encode(w, http.StatusCreated, proj); err != nil {
+		errors.ServerError(r.Context(), w, err)
 	}
 }
 
 func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 	reqObj := &UpdateRequest{}
-	if err := util.Decode(r, reqObj); err != nil {
-		util.HandleServerError(r.Context(), w, err)
+	if err := json.Decode(r, reqObj); err != nil {
+		errors.ServerError(r.Context(), w, err)
 		return
 	}
 	proj, err := h.service.Update(r.Context(), *reqObj)
 	if err != nil {
-		util.HandleServerError(r.Context(), w, err)
+		errors.ServerError(r.Context(), w, err)
 		return
 	}
-	if err := util.Encode(w, http.StatusAccepted, proj); err != nil {
-		util.HandleServerError(r.Context(), w, err)
+	if err := json.Encode(w, http.StatusAccepted, proj); err != nil {
+		errors.ServerError(r.Context(), w, err)
 	}
 }
 
@@ -116,10 +117,10 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	err := h.service.Delete(r.Context(), id)
 	if err != nil {
-		util.HandleServerError(r.Context(), w, err)
+		errors.ServerError(r.Context(), w, err)
 		return
 	}
-	if err := util.Encode(w, http.StatusAccepted, struct{}{}); err != nil {
-		util.HandleServerError(r.Context(), w, err)
+	if err := json.Encode(w, http.StatusAccepted, struct{}{}); err != nil {
+		errors.ServerError(r.Context(), w, err)
 	}
 }

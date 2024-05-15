@@ -11,7 +11,7 @@ import (
 	"github.com/arthurlee945/Docrilla/internal/model"
 	"github.com/arthurlee945/Docrilla/internal/service/auth"
 	"github.com/arthurlee945/Docrilla/internal/service/field"
-	"github.com/arthurlee945/Docrilla/internal/util"
+	"github.com/arthurlee945/Docrilla/internal/util/ptr"
 )
 
 var validate = validator.New(validator.WithRequiredStructEnabled())
@@ -100,16 +100,16 @@ func (s *service) Create(ctx context.Context, req CreateRequest) (*model.Project
 	}
 
 	if req.Route == nil {
-		req.Route = util.ToPointer(uuid.NewString())
+		req.Route = ptr.ToPointer(uuid.NewString())
 	}
 
 	createdProj, err := s.projRepository.Create(ctx, &model.Project{
 		UserID:      &userId,
-		Title:       util.ToPointer(req.Title),
+		Title:       ptr.ToPointer(req.Title),
 		Description: req.Description,
 		Route:       req.Route,
 		Token:       req.Token,
-		DocumentUrl: util.ToPointer(req.DocumentUrl),
+		DocumentUrl: ptr.ToPointer(req.DocumentUrl),
 	})
 	if err != nil {
 		return nil, err
@@ -154,7 +154,7 @@ func (s *service) Update(ctx context.Context, req UpdateRequest) (*model.Project
 			defer wg.Done()
 			updatedProj, err := s.projRepository.Update(uCtx, &model.Project{
 				UserID:      &userId,
-				UUID:        util.ToPointer(req.UUID),
+				UUID:        ptr.ToPointer(req.UUID),
 				Title:       req.Title,
 				Description: req.Description,
 				DocumentUrl: req.DocumentUrl,

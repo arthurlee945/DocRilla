@@ -8,7 +8,7 @@ import (
 	"github.com/arthurlee945/Docrilla/internal/model"
 	"github.com/arthurlee945/Docrilla/internal/model/mock"
 	"github.com/arthurlee945/Docrilla/internal/service/project"
-	"github.com/arthurlee945/Docrilla/internal/util"
+	"github.com/arthurlee945/Docrilla/internal/util/ptr"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 )
@@ -74,10 +74,10 @@ func TestProjectRepository_CreateUpdateDeleteProject(t *testing.T) {
 
 	mockProj := &model.Project{
 		UserID:      mock.User.ID,
-		Title:       util.ToPointer(title),
-		Description: util.ToPointer(desc),
-		DocumentUrl: util.ToPointer(docURL),
-		Route:       util.ToPointer(testRoute),
+		Title:       ptr.ToPointer(title),
+		Description: ptr.ToPointer(desc),
+		DocumentUrl: ptr.ToPointer(docURL),
+		Route:       ptr.ToPointer(testRoute),
 	}
 
 	//CREATE
@@ -92,10 +92,10 @@ func TestProjectRepository_CreateUpdateDeleteProject(t *testing.T) {
 	// UPDATE
 
 	newTitle, newDesc, newDocURL := "NEW TEST TITLE", "NEW TEST DESCRIPTION", "NEW TEST DOC URL"
-	newProj.Title = util.ToPointer(newTitle)
-	newProj.Description = util.ToPointer(newDesc)
-	newProj.DocumentUrl = util.ToPointer(newDocURL)
-	newProj.VisitedAt = util.ToPointer(time.Now())
+	newProj.Title = ptr.ToPointer(newTitle)
+	newProj.Description = ptr.ToPointer(newDesc)
+	newProj.DocumentUrl = ptr.ToPointer(newDocURL)
+	newProj.VisitedAt = ptr.ToPointer(time.Now())
 	updatedProj, err := repo.Update(ctx, newProj)
 	if err != nil {
 		t.Errorf("Expected Update to not throw but got err = %+v", err)
