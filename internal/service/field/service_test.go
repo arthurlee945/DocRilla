@@ -13,7 +13,11 @@ import (
 
 func TestFieldService_CRUDValidation(t *testing.T) {
 	dbConn, service := servicePrep(t)
-	defer dbConn.Close()
+	defer func() {
+		if err := dbConn.Close(); err != nil {
+			t.Fatalf("Tried to close DB connection but got=%v", err)
+		}
+	}()
 	ctx := context.Background()
 
 	//GetById

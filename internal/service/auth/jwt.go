@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/arthurlee945/Docrilla/internal/errors"
@@ -28,7 +27,7 @@ func VerifyToken(secret string, authToken string) (*VerifiedClaim, error) {
 	if !ok || !token.Valid {
 		return nil, errors.ErrInvalidToken
 	}
-	fmt.Println(claim, claim["userId"])
+
 	userId, ok := claim["userId"].(float64)
 	if !ok {
 		return nil, errors.ErrInvalidToken

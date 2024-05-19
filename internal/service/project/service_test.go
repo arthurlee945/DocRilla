@@ -15,7 +15,11 @@ import (
 
 func TestProjectService_CRUDValidation(t *testing.T) {
 	dbConn, service, ctx := servicePrep(t)
-	defer dbConn.Close()
+	defer func() {
+		if err := dbConn.Close(); err != nil {
+			t.Fatalf("Tried to close DB connection but got=%v", err)
+		}
+	}()
 
 	//GetAll
 	getAllRequest := project.GetAllRequest{10, ""}
@@ -89,7 +93,11 @@ func TestProjectService_CRUDValidation(t *testing.T) {
 func TestProjectService_CreateUpdateDelete(t *testing.T) {
 	dbConn, service, ctx := servicePrep(t)
 	fieldService := field.NewService(field.NewRepository(dbConn))
-	defer dbConn.Close()
+	defer func() {
+		if err := dbConn.Close(); err != nil {
+			t.Fatalf("Tried to close DB connection but got=%v", err)
+		}
+	}()
 
 	mockProj, err := service.Create(ctx, project.CreateRequest{
 		Title:       *mock.Project.Title,

@@ -33,7 +33,7 @@ func (r *repository) GetById(ctx context.Context, uuid string) (*model.Field, er
 	return field, nil
 }
 
-func (r *repository) Create(ctx context.Context, field *model.Field) (*model.Field, error) {
+func (r *repository) Create(ctx context.Context, field *model.Field) (cField *model.Field, err error) {
 	rows, err := r.db.NamedQueryContext(ctx,
 		`
 	INSERT INTO field (project_id, x, y, width, height, page, type)
@@ -42,7 +42,11 @@ func (r *repository) Create(ctx context.Context, field *model.Field) (*model.Fie
 	if err != nil {
 		return nil, errors.RepoError(err)
 	}
-	defer rows.Close()
+	defer func() {
+		if rowCloseErr := rows.Close(); rowCloseErr != nil {
+			err = rowCloseErr
+		}
+	}()
 	if !rows.Next() {
 		return nil, errors.ErrNotFound
 	}
@@ -53,7 +57,7 @@ func (r *repository) Create(ctx context.Context, field *model.Field) (*model.Fie
 	return createdProj, nil
 }
 
-func (r *repository) Update(ctx context.Context, field *model.Field) (*model.Field, error) {
+func (r *repository) Update(ctx context.Context, field *model.Field) (uField *model.Field, err error) {
 	rows, err := r.db.NamedQueryContext(ctx,
 		`UPDATE field
 	SET
@@ -68,7 +72,11 @@ func (r *repository) Update(ctx context.Context, field *model.Field) (*model.Fie
 	if err != nil {
 		return nil, errors.RepoError(err)
 	}
-	defer rows.Close()
+	defer func() {
+		if rowCloseErr := rows.Close(); rowCloseErr != nil {
+			err = rowCloseErr
+		}
+	}()
 	updatedField := &model.Field{}
 	if !rows.Next() {
 		return nil, errors.ErrNotFound

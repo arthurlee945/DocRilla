@@ -15,7 +15,11 @@ import (
 
 func TestHandlers(t *testing.T) {
 	handler, dbConn := handlerPrep(t)
-	defer dbConn.Close()
+	defer func() {
+		if err := dbConn.Close(); err != nil {
+			t.Fatalf("Tried to close DB connection but got=%v", err)
+		}
+	}()
 
 	type args struct {
 		req *http.Request
@@ -29,7 +33,7 @@ func TestHandlers(t *testing.T) {
 		{name: "must return http.StatusOK for GetOverviewById to valid uuid",
 			args: func(*testing.T) args {
 				req, err := http.NewRequest("GET", "/projects/6be6167d-d25d-4ca4-9b6d-bfdc4e150f3d/overview", nil)
-				req.Header.Set("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlzcyI6IkRvY3JpbGxhIiwiZXhwIjoxNzE1ODIxOTgzfQ.Q5d8FrzMYQEc-g-oD2cWCqNlvULllZyRM28CyCTVdbM")
+				req.Header.Set("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlzcyI6IkRvY3JpbGxhIiwiZXhwIjo0ODY5NzQ4ODQyfQ.TbU1F4gO5g8NAsrVl5mbgw_Q_pBO0fbWChUJG73o_ig")
 				if err != nil {
 					t.Fatalf("failed to GetOverviewById: %s", err.Error())
 				}
@@ -43,7 +47,7 @@ func TestHandlers(t *testing.T) {
 		{name: "must return http.StatusOK for GetDetailById to valid uuid",
 			args: func(*testing.T) args {
 				req, err := http.NewRequest("GET", "/projects/8fd01895-37a7-4eaf-9b44-a73240e78eb9/detail", nil)
-				req.Header.Set("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlzcyI6IkRvY3JpbGxhIiwiZXhwIjoxNzE1ODIxOTgzfQ.Q5d8FrzMYQEc-g-oD2cWCqNlvULllZyRM28CyCTVdbM")
+				req.Header.Set("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlzcyI6IkRvY3JpbGxhIiwiZXhwIjo0ODY5NzQ4ODQyfQ.TbU1F4gO5g8NAsrVl5mbgw_Q_pBO0fbWChUJG73o_ig")
 				if err != nil {
 					t.Fatalf("failed to GetDetailById: %s", err.Error())
 				}

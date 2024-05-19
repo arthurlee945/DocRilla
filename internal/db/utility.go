@@ -40,7 +40,9 @@ func Seed(db *sqlx.DB) error {
 	for uRows.Next() {
 		uRows.Scan(&userID)
 	}
-	uRows.Close()
+	if err := uRows.Close(); err != nil {
+		return ErrFailedToSeedDB.Wrap(err)
+	}
 
 	// Account Gen
 	if _, err := db.NamedExec(`INSERT INTO account (user_id, type, provider) VALUES (:user_id, :type, :provider)`, mock.Account); err != nil {
@@ -58,7 +60,9 @@ func Seed(db *sqlx.DB) error {
 	for pRows.Next() {
 		pRows.Scan(&projID)
 	}
-	pRows.Close()
+	if err := pRows.Close(); err != nil {
+		return ErrFailedToSeedDB.Wrap(err)
+	}
 
 	// Field Gen
 	for _, field := range []*model.Field{&mock.Field1, &mock.Field2} {

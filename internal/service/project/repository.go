@@ -79,7 +79,7 @@ func (r *repository) GetDetailById(ctx context.Context, uuid string, userID uint
 	return proj, nil
 }
 
-func (r *repository) Create(ctx context.Context, proj *model.Project) (*model.Project, error) {
+func (r *repository) Create(ctx context.Context, proj *model.Project) (cProject *model.Project, err error) {
 	rows, err := r.db.NamedQueryContext(ctx, `
 		INSERT INTO project ( user_id, title, description, document_url, token, route) 
 		VALUES (:user_id, :title, :description, :document_url, :token, :route) RETURNING *
@@ -87,7 +87,11 @@ func (r *repository) Create(ctx context.Context, proj *model.Project) (*model.Pr
 	if err != nil {
 		return nil, errors.RepoError(err)
 	}
-	defer rows.Close()
+	defer func() {
+		if rowCloseErr := rows.Close(); rowCloseErr != nil {
+			err = rowCloseErr
+		}
+	}()
 	if !rows.Next() {
 		return nil, errors.ErrUnknown
 	}
@@ -98,7 +102,7 @@ func (r *repository) Create(ctx context.Context, proj *model.Project) (*model.Pr
 	return newProj, nil
 }
 
-func (r *repository) Update(ctx context.Context, proj *model.Project) (*model.Project, error) {
+func (r *repository) Update(ctx context.Context, proj *model.Project) (uProject *model.Project, err error) {
 	rows, err := r.db.NamedQueryContext(ctx,
 		`UPDATE project
 	SET
@@ -114,7 +118,11 @@ func (r *repository) Update(ctx context.Context, proj *model.Project) (*model.Pr
 	if err != nil {
 		return nil, errors.RepoError(err)
 	}
-	defer rows.Close()
+	defer func() {
+		if rowCloseErr := rows.Close(); rowCloseErr != nil {
+			err = rowCloseErr
+		}
+	}()
 	updatedProj := &model.Project{}
 	if !rows.Next() {
 		return nil, errors.ErrNotFound

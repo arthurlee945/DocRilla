@@ -15,7 +15,11 @@ import (
 
 func TestFieldRepository_GetById(t *testing.T) {
 	dbConn, repo := repoPrep(t)
-	defer dbConn.Close()
+	defer func() {
+		if err := dbConn.Close(); err != nil {
+			t.Fatalf("Tried to close DB connection but got=%v", err)
+		}
+	}()
 
 	ctx := context.Background()
 
@@ -43,7 +47,11 @@ func TestFieldRepository_GetById(t *testing.T) {
 
 func TestFieldRepository_CreateUpdateDeleteProject(t *testing.T) {
 	dbConn, repo := repoPrep(t)
-	defer dbConn.Close()
+	defer func() {
+		if err := dbConn.Close(); err != nil {
+			t.Fatalf("Tried to close DB connection but got=%v", err)
+		}
+	}()
 	ctx := context.Background()
 
 	x, y, width, height, uType := 8.0, 88.0, 88.8, 88.88, fieldEnum.TEXT

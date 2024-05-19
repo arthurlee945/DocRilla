@@ -15,7 +15,11 @@ import (
 
 func TestProjectRepository_GetAll(t *testing.T) {
 	dbConn, repo := repoPrep(t)
-	defer dbConn.Close()
+	defer func() {
+		if err := dbConn.Close(); err != nil {
+			t.Fatalf("Tried to close DB connection but got=%v", err)
+		}
+	}()
 
 	ctx := context.Background()
 	projs, nextCursor, err := repo.GetAll(ctx, 10, "", *mock.User.ID)
@@ -29,7 +33,11 @@ func TestProjectRepository_GetAll(t *testing.T) {
 
 func TestProjectRepository_GetOverviewById(t *testing.T) {
 	dbConn, repo := repoPrep(t)
-	defer dbConn.Close()
+	defer func() {
+		if err := dbConn.Close(); err != nil {
+			t.Fatalf("Tried to close DB connection but got=%v", err)
+		}
+	}()
 
 	ctx := context.Background()
 
@@ -47,7 +55,11 @@ func TestProjectRepository_GetOverviewById(t *testing.T) {
 
 func TestProjectRepository_GetDetailById(t *testing.T) {
 	dbConn, repo := repoPrep(t)
-	defer dbConn.Close()
+	defer func() {
+		if err := dbConn.Close(); err != nil {
+			t.Fatalf("Tried to close DB connection but got=%v", err)
+		}
+	}()
 	ctx := context.Background()
 	if proj, err := repo.GetDetailById(ctx, "wrongid", *mock.User.ID); err == nil {
 		t.Errorf("Expected GetDetailById to return Error, but got err = %+v; proj = %+v", err, proj)
@@ -67,7 +79,11 @@ func TestProjectRepository_GetDetailById(t *testing.T) {
 
 func TestProjectRepository_CreateUpdateDeleteProject(t *testing.T) {
 	dbConn, repo := repoPrep(t)
-	defer dbConn.Close()
+	defer func() {
+		if err := dbConn.Close(); err != nil {
+			t.Fatalf("Tried to close DB connection but got=%v", err)
+		}
+	}()
 	ctx := context.Background()
 
 	title, desc, docURL, testRoute := "TEST TITLE", "TEST DESCRIPTION", "TEST DOC URL", "test-route"+time.Now().String()
