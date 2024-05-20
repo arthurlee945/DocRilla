@@ -60,8 +60,10 @@ func run(ctx context.Context, w io.Writer, _ []string) error {
 	projService := project.NewService(project.NewRepository(dbConn), field.NewRepository(dbConn))
 	srv := server.New(ctx, cfg, authService, projService)
 	httpServer := http.Server{
-		Addr:    *addr,
-		Handler: srv,
+		Addr:              *addr,
+		ReadTimeout:       500 * time.Millisecond,
+		ReadHeaderTimeout: 500 * time.Millisecond,
+		Handler:           http.TimeoutHandler(srv, time.Second*2, "request timed out"),
 	}
 	go func() {
 		fmt.Fprintln(w, "Listening on "+httpLink(*addr, false))
